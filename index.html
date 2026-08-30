@@ -1001,8 +1001,9 @@ document.getElementById("syncEnable").addEventListener("click", async ()=>{
   setSyncCfg(cfg); msg.textContent="Connecting..."; setSyncStatus("syncing");
   try{
     const res=await fetch(SYNC_URL, {headers: token?{"x-sync-token":token}:{}});
-    if(res.status===401){ setSyncStatus("auth"); msg.textContent="The access token was rejected by the server."; return; }
-    if(!res.ok) throw new Error("http "+res.status);
+    if(res.status===401){ setSyncStatus("auth"); msg.textContent="The access token was rejected. It must match the SYNC_TOKEN environment variable set in Netlify."; return; }
+    if(res.status===404){ setSyncStatus("bad"); msg.textContent="Sync endpoint not found (404): the function did not deploy. Make sure index.html, netlify.toml, package.json and the netlify folder sit at the folder Netlify builds from. If you committed the whole sync-deploy folder, set the Netlify base directory to sync-deploy, then redeploy."; return; }
+    if(!res.ok){ setSyncStatus("bad"); msg.textContent="The sync function returned an error ("+res.status+"). Open the Netlify dashboard, Functions tab, and read the sync function's logs."; return; }
     const rec=await res.json();
     if(rec && rec.payload){
       let obj; try{ obj=await decryptPayload(rec.payload, passphrase); }catch(e){ setSyncStatus("badpass"); msg.textContent="That passphrase could not open the shared copy. Use the same passphrase as your other device."; return; }
@@ -1012,7 +1013,7 @@ document.getElementById("syncEnable").addEventListener("click", async ()=>{
       cfg.lastServerAt=0; setSyncCfg(cfg); await syncPush(true);
       msg.textContent = (syncState==="ok") ? "Sync on. This device's data is now the shared copy." : ("Sync on, upload status: "+syncState);
     }
-  }catch(e){ setSyncStatus("offline"); msg.textContent="Could not reach the sync server. The app still works offline and will retry when you reopen it."; }
+  }catch(e){ setSyncStatus("offline"); msg.textContent="Could not reach the sync server. If the address bar starts with file:// you are on a local copy - open your deployed https://...netlify.app address instead. Otherwise you may be offline; it will retry."; }
 });
 
 function rerenderAll(){
