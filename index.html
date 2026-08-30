@@ -1,0 +1,1032 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Long-term Financial Projection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#ECEAE3; --card:#FAF9F5; --ink:#1E2420; --muted:#6B6F67;
+    --hair:#D6D3C9; --hair-strong:#C3BFB3;
+    --pounamu:#2E6E54; --pounamu-soft:#dfe9e2;
+    --clay:#B14A38; --clay-soft:#f0dcd6;
+    --indigo:#2B3A55; --indigo-soft:#dde1ea; --amber:#C08A2E; --amber-soft:#f0e3c8;
+    --display:'Fraunces',Georgia,serif; --ui:'Inter',system-ui,-apple-system,sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:var(--paper); color:var(--ink); font-family:var(--ui); font-size:15px; line-height:1.45; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1200px; margin:0 auto; padding:28px 22px 80px}
+
+  .mast{display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:18px; padding-bottom:18px; border-bottom:1.5px solid var(--ink)}
+  .mast h1{font-family:var(--display); font-weight:600; font-size:clamp(28px,4vw,44px); line-height:1; letter-spacing:-.01em; margin:0}
+  .mast .accent{color:var(--pounamu)}
+  .mast p{margin:8px 0 0; color:var(--muted); max-width:52ch; font-size:13.5px}
+  .data-tools{display:flex; gap:7px}
+  .btn{background:var(--card); border:1px solid var(--hair-strong); border-radius:7px; padding:6px 11px; cursor:pointer; font-size:12.5px; transition:.12s; font-family:var(--ui); color:var(--ink)}
+  .btn:hover{border-color:var(--ink); background:#fff}
+  .btn:focus-visible,select:focus-visible,input:focus-visible,.tab:focus-visible{outline:2px solid var(--indigo); outline-offset:2px}
+
+  .tabs{display:flex; gap:4px; margin:22px 0 0; border-bottom:1px solid var(--hair); flex-wrap:wrap}
+  .tab{background:none; border:none; border-bottom:2px solid transparent; padding:9px 4px; margin-right:20px; cursor:pointer; font-size:14px; color:var(--muted); font-weight:500}
+  .tab[aria-selected=true]{color:var(--ink); border-bottom-color:var(--pounamu)}
+  .panel{margin-top:20px}
+  .hidden{display:none !important}
+
+  .eyebrow{font-size:10.5px; text-transform:uppercase; letter-spacing:.14em; color:var(--indigo); font-weight:600}
+  .lead{font-family:var(--display); font-size:20px; font-weight:600; margin:0 0 2px}
+  .note{font-size:12.5px; color:var(--muted); max-width:74ch; margin:6px 0 0} .note b{color:var(--ink)}
+
+  /* Tables */
+  table{border-collapse:collapse; width:100%}
+  th,td{text-align:right; padding:8px 10px; white-space:nowrap}
+  th{font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); font-weight:600; border-bottom:1px solid var(--hair-strong)}
+  th.l,td.l{text-align:left}
+  .num{font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:13px}
+
+  /* Assets */
+  .assets{max-width:760px}
+  .assets td{border-bottom:1px solid var(--hair)}
+  .assets input.amt{width:120px}
+  .assets input.nm{width:170px}
+  input,select{font-family:var(--ui); font-size:14px; color:var(--ink)}
+  input.cell{font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:13px; text-align:right; padding:6px 8px; border:1px solid var(--hair); border-radius:6px; background:#fff}
+  input.cell:focus{border-color:var(--indigo)}
+  input.nm{font-family:var(--ui); text-align:left; padding:6px 8px; border:1px solid var(--hair); border-radius:6px; background:#fff}
+  select.bucket{padding:5px 8px; border:1px solid var(--hair-strong); border-radius:6px; background:#fff}
+  .delrow{border:none; background:none; color:var(--muted); cursor:pointer; font-size:16px; line-height:1; padding:2px 6px; border-radius:5px}
+  .delrow:hover{background:var(--clay-soft); color:var(--clay)}
+  .assets tfoot td{border-top:1.5px solid var(--ink); font-family:var(--mono); font-variant-numeric:tabular-nums; font-weight:600; padding-top:10px}
+  .pill{display:inline-block; font-size:10px; font-family:var(--mono); padding:1px 7px; border-radius:20px; letter-spacing:.02em}
+  .pill.port{background:var(--indigo-soft); color:var(--indigo)} .pill.work{background:var(--pounamu-soft); color:var(--pounamu)} .pill.reserve{background:var(--amber-soft); color:#8a6516}
+  .splitbar{height:26px; border-radius:8px; overflow:hidden; display:flex; margin:14px 0 6px; max-width:760px; border:1px solid var(--hair)}
+  .splitbar i{display:block; height:100%} .splitbar .p{background:var(--indigo)} .splitbar .w{background:var(--pounamu)} .splitbar .r{background:var(--amber)}
+  .splitkey{display:flex; gap:20px; font-size:12px; color:var(--muted); font-family:var(--mono)} .splitkey b{color:var(--ink)}
+
+  /* Assumptions */
+  .assume-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px; max-width:1000px}
+  .acard{background:var(--card); border:1px solid var(--hair); border-radius:12px; padding:14px 15px}
+  .acard h3{font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--indigo); margin:0 0 11px; font-weight:600}
+  .field{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:8px 0}
+  .field label{font-size:13px; color:var(--ink)}
+  .field .in{display:inline-flex; align-items:center; gap:4px}
+  .field input{width:84px; font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:13px; text-align:right; padding:5px 7px; border:1px solid var(--hair); border-radius:6px; background:#fff}
+  .field .suffix{font-family:var(--mono); font-size:12px; color:var(--muted); width:14px}
+
+  /* Projection */
+  .ptools{display:flex; flex-wrap:wrap; align-items:center; gap:14px 18px; margin-bottom:6px}
+  .seg{display:inline-flex; background:var(--card); border:1px solid var(--hair-strong); border-radius:9px; padding:3px}
+  .seg button{border:none; background:none; padding:7px 14px; border-radius:6px; cursor:pointer; font-size:13px; color:var(--muted); font-family:var(--ui)}
+  .seg button[aria-pressed=true]{background:var(--indigo); color:#fff; font-weight:500}
+  .infl{display:flex; align-items:center; gap:7px; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted)}
+  .infl input{width:64px; font-family:var(--mono); text-align:right; padding:5px 7px; border:1px solid var(--hair-strong); border-radius:6px; background:var(--card)}
+  .grid-wrap{overflow-x:auto; border:1px solid var(--hair); border-radius:12px; background:var(--card)}
+  .grid-scroll-top{overflow-x:auto; overflow-y:hidden; height:14px; margin-bottom:3px; scrollbar-width:thin; scrollbar-color:var(--hair-strong) var(--paper)}
+  .grid-scroll-spacer{height:1px}
+  .grid-scroll-top::-webkit-scrollbar,.grid-wrap::-webkit-scrollbar{height:12px}
+  .grid-scroll-top::-webkit-scrollbar-thumb,.grid-wrap::-webkit-scrollbar-thumb{background:var(--hair-strong); border-radius:6px}
+  .grid-scroll-top::-webkit-scrollbar-track,.grid-wrap::-webkit-scrollbar-track{background:var(--paper); border-radius:6px}
+  table.proj{min-width:1500px; font-size:12.5px}
+  table.proj th,table.proj td{padding:6px 9px; border-bottom:1px solid var(--hair)}
+  table.proj th{position:sticky; top:0; background:var(--card); z-index:3; white-space:nowrap}
+  table.proj td.l.sticky,table.proj th.l.sticky{position:sticky; left:0; background:var(--card); z-index:2; border-right:1px solid var(--hair-strong); min-width:64px}
+  table.proj th.l.sticky{z-index:4}
+  table.proj .num{font-size:12.5px}
+  table.proj input.cell{width:66px; padding:4px 5px; font-size:12px}
+  table.proj th input.hdr-edit{width:60px; font-family:var(--ui); font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); background:transparent; border:none; border-bottom:1px dashed transparent; text-align:right; padding:0 0 1px; cursor:text}
+  table.proj th input.hdr-edit:hover{border-bottom-color:var(--hair-strong)}
+  table.proj th input.hdr-edit:focus{outline:none; border-bottom-color:var(--indigo); color:var(--ink)}
+  table.proj .sec-port{background:rgba(43,58,85,.05)} table.proj .sec-save{background:rgba(46,110,84,.05)}
+  table.proj td.net{font-weight:600}
+  table.proj tr:hover td{background:#fff}
+  .phase{font-family:var(--mono); font-size:10px; padding:0 5px; border-radius:10px}
+  .phase.p6{background:var(--indigo-soft);color:var(--indigo)} .phase.p5{background:var(--amber-soft);color:#8a6516} .phase.p4{background:var(--clay-soft);color:var(--clay)} .phase.p0{color:var(--muted)}
+  .colgroup{font-family:var(--display); font-size:12px; color:var(--muted); text-align:left; padding-top:10px}
+
+  /* Dashboard */
+  .summary{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:6px}
+  .stat{background:var(--card); border:1px solid var(--hair); border-radius:12px; padding:14px 15px}
+  .stat .slbl{font-size:10px; text-transform:uppercase; letter-spacing:.09em; color:var(--muted)}
+  .stat .sval{font-family:var(--mono); font-weight:600; font-size:22px; letter-spacing:-.02em; margin-top:6px; font-variant-numeric:tabular-nums}
+  .stat .ssub{font-family:var(--mono); font-size:11.5px; margin-top:3px; color:var(--muted)}
+  .stat.lead-card{background:var(--indigo); border-color:var(--indigo); color:#fff} .stat.lead-card .slbl,.stat.lead-card .ssub{color:#c8cfdd}
+  .pos{color:var(--pounamu)} .neg{color:var(--clay)}
+  .chart-card{background:var(--card); border:1px solid var(--hair); border-radius:14px; padding:16px 18px; margin-top:16px}
+  .chart-card h3{font-family:var(--display); font-size:17px; font-weight:600; margin:0 0 2px} .chart-card .csub{font-size:12px; color:var(--muted); margin:0 0 10px}
+  .chart-card svg{width:100%; height:auto; display:block}
+  .clegend{display:flex; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--muted); margin-top:8px; font-family:var(--mono)}
+  .clegend span{display:inline-flex; align-items:center; gap:6px} .clegend i{width:13px; height:4px; border-radius:2px; display:inline-block}
+  .insights{margin-top:16px; background:var(--card); border:1px solid var(--hair); border-radius:14px; padding:16px 18px}
+  .insights h3{font-family:var(--display); font-size:17px; font-weight:600; margin:0 0 10px}
+  .insights ul{margin:0; padding-left:18px} .insights li{margin:7px 0; font-size:13.5px} .insights b{font-weight:600}
+
+  .footnote{margin-top:26px; font-size:12px; color:var(--muted); max-width:80ch}
+
+  .sync-pill{font-family:var(--mono); font-size:11px; padding:5px 10px; border-radius:20px; border:1px solid var(--hair-strong); background:var(--card); color:var(--muted); white-space:nowrap; align-self:center}
+  .sync-pill.ok{background:var(--pounamu-soft); color:#1f4e3b; border-color:var(--pounamu-soft)}
+  .sync-pill.busy{background:var(--amber-soft); color:#8a6516; border-color:var(--amber-soft)}
+  .sync-pill.bad{background:var(--clay-soft); color:var(--clay); border-color:var(--clay-soft)}
+  .sync-banner{position:sticky; top:0; z-index:40; background:var(--clay); color:#fff; padding:10px 16px; display:flex; flex-wrap:wrap; align-items:center; gap:12px; font-size:13.5px; border-radius:0 0 10px 10px}
+  .sync-banner .sb-actions{margin-left:auto; display:flex; gap:8px}
+  .sync-banner .btn{background:#fff; border-color:#fff}
+  .modal-back{position:fixed; inset:0; background:rgba(20,24,26,.45); display:flex; align-items:center; justify-content:center; z-index:50; padding:20px}
+  .modal{background:var(--paper); border:1px solid var(--hair-strong); border-radius:16px; padding:22px 24px; max-width:460px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.2)}
+  .modal h2{font-family:var(--display); font-weight:600; font-size:22px; margin:0 0 10px}
+  .mnote{font-size:12.5px; color:var(--muted); line-height:1.5; margin:0 0 14px} .mnote b{color:var(--ink)} .mnote.small{margin:14px 0 0; font-size:11.5px}
+  .mfield{display:block; font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin:0 0 12px}
+  .mfield input{display:block; width:100%; margin-top:6px; font-family:var(--mono); font-size:14px; padding:9px 11px; border:1px solid var(--hair-strong); border-radius:8px; background:#fff; color:var(--ink); text-transform:none; letter-spacing:0}
+  .mrow{display:flex; flex-wrap:wrap; gap:8px; margin-top:4px}
+  .btn.primary{background:var(--indigo); color:#fff; border-color:var(--indigo)}
+  .btn.primary:hover{background:#22304a}
+
+  /* Stress test */
+  .stress-dials{display:flex; flex-wrap:wrap; gap:12px; margin:6px 0 18px}
+  .sdial{background:var(--card); border:1px solid var(--hair); border-radius:11px; padding:11px 13px; min-width:170px}
+  .sdial .sdlbl{font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:7px}
+  .sdial .sdrow{display:flex; align-items:center; gap:9px; font-family:var(--mono); font-variant-numeric:tabular-nums}
+  .sdial .sdbase{font-size:14px; color:var(--muted)}
+  .sdial .sdarrow{color:var(--clay); font-size:15px}
+  .sdial .sdin{display:inline-flex; align-items:center; gap:3px}
+  .sdial .sdin input{width:62px; font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:14px; font-weight:600; text-align:right; padding:5px 7px; border:1px solid var(--clay-soft); border-radius:6px; background:#fff; color:var(--clay)}
+  .sdial .suffix{font-family:var(--mono); font-size:12px; color:var(--muted)}
+  .cmp-wrap{overflow-x:auto; border:1px solid var(--hair); border-radius:12px; background:var(--card)}
+  table.cmp{min-width:520px}
+  table.cmp th,table.cmp td{padding:10px 14px; border-bottom:1px solid var(--hair)}
+  table.cmp th{font-size:10.5px}
+  table.cmp td.l{font-family:var(--ui); font-size:13.5px}
+  table.cmp td:not(.l){font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:14px}
+  table.cmp tr:last-child td{border-bottom:none}
+  table.cmp .base-col{color:var(--indigo); font-weight:600}
+  .verdict{margin-top:16px; background:var(--indigo); color:#fff; border-radius:14px; padding:16px 18px; font-size:14px; line-height:1.55; max-width:none}
+  .verdict b{color:#fff} .verdict .hi{color:#f0c8bf}
+  .sdial.shock{border-color:var(--clay-soft); background:#fff}
+  .sdial.shock .sdin input{width:54px}
+  .mc-controls{display:flex; flex-wrap:wrap; align-items:center; gap:14px 18px; margin:4px 0 16px}
+  .mc-controls .infl input{width:74px}
+
+  @media(max-width:880px){ .summary{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mast">
+    <div>
+      <h1>The <span class="accent">long horizon</span></h1>
+      <p>Enter your liquid assets, set the assumptions, and project portfolio, cash flow and net worth out to age 90 - shown in today's dollars and in real, inflation-adjusted terms.</p>
+    </div>
+    <div class="data-tools">
+      <button class="btn" id="export">Export</button>
+      <button class="btn" id="importBtn">Import</button>
+      <button class="btn" id="reset">Reset</button>
+      <input type="file" id="importFile" accept="application/json" class="hidden">
+      <button class="btn" id="syncBtn">Sync</button>
+      <span class="sync-pill" id="syncPill" title="Device sync status">Sync off</span>
+    </div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tab-assets" role="tab" aria-selected="true">Liquid assets</button>
+    <button class="tab" id="tab-assume" role="tab" aria-selected="false">Assumptions</button>
+    <button class="tab" id="tab-proj" role="tab" aria-selected="false">Projection</button>
+    <button class="tab" id="tab-dash" role="tab" aria-selected="false">Dashboard</button>
+    <button class="tab" id="tab-stress" role="tab" aria-selected="false">Stress test</button>
+    <button class="tab" id="tab-mc" role="tab" aria-selected="false">Monte Carlo</button>
+  </div>
+
+  <!-- Assets -->
+  <section class="panel" id="assetsPanel" role="tabpanel">
+    <p class="eyebrow">Step one</p>
+    <h2 class="lead">What you hold today</h2>
+    <p class="note">Tag each holding as <b>portfolio</b> (long-term invested capital) or <b>working capital</b> (cash and near-cash). These two totals seed the projection. Add or remove rows freely.</p>
+    <table class="assets" id="assetsTable">
+      <thead><tr><th class="l">Asset</th><th>Amount</th><th class="l">Bucket</th><th>Share</th><th></th></tr></thead>
+      <tbody id="assetsBody"></tbody>
+      <tfoot>
+        <tr><td class="l">Total</td><td class="num" id="aTotal"></td><td colspan="3"></td></tr>
+        <tr><td class="l"><span class="pill port">portfolio</span></td><td class="num" id="aPort"></td><td class="l num" id="aPortPct"></td><td colspan="2"></td></tr>
+        <tr><td class="l"><span class="pill work">working capital</span></td><td class="num" id="aWork"></td><td class="l num" id="aWorkPct"></td><td colspan="2"></td></tr>
+        <tr><td class="l"><span class="pill reserve">reserve</span></td><td class="num" id="aRes"></td><td class="l num" id="aResPct"></td><td colspan="2"></td></tr>
+      </tfoot>
+    </table>
+    <button class="btn" id="addAsset" style="margin-top:12px">+ Add asset</button>
+    <div class="splitbar" id="splitbar"><i class="p"></i><i class="w"></i><i class="r"></i></div>
+    <div class="splitkey"><span>Portfolio <b id="kPort"></b></span><span>Working capital <b id="kWork"></b></span><span>Reserve <b id="kRes"></b></span></div>
+  </section>
+
+  <!-- Assumptions -->
+  <section class="panel hidden" id="assumePanel" role="tabpanel">
+    <p class="eyebrow">Step two</p>
+    <h2 class="lead">The model's dials</h2>
+    <p class="note">Every figure below feeds the projection live. Defaults come from your 6-5-4 worksheet.</p>
+    <div class="assume-grid" id="assumeGrid"></div>
+  </section>
+
+  <!-- Projection -->
+  <section class="panel hidden" id="projPanel" role="tabpanel">
+    <div class="ptools">
+      <div class="seg" id="view" role="group" aria-label="Dollar basis">
+        <button data-v="nominal" aria-pressed="true">Actual dollars</button>
+        <button data-v="real" aria-pressed="false">2026 dollars</button>
+      </div>
+      <label class="infl">Inflation <input type="number" step="0.1" id="inflInput"> %</label>
+      <span class="note" id="viewNote" style="margin:0"></span>
+    </div>
+    <div class="grid-scroll-top" id="projScrollTop"><div class="grid-scroll-spacer" id="projScrollSpacer"></div></div>
+    <div class="grid-wrap" id="projGridWrap">
+      <table class="proj"><thead id="projHead"></thead><tbody id="projBody"></tbody></table>
+    </div>
+    <p class="footnote" id="projFoot"></p>
+  </section>
+
+  <!-- Dashboard -->
+  <section class="panel hidden" id="dashPanel" role="tabpanel">
+    <div class="summary" id="summary"></div>
+    <div class="chart-card"><h3 id="c1title"></h3><p class="csub" id="c1sub"></p><div id="chartNet"></div>
+      <div class="clegend"><span><i style="background:var(--indigo)"></i>Net worth (actual $)</span><span><i style="background:var(--clay)"></i>Net worth (2026 $)</span></div></div>
+    <div class="chart-card"><h3>Where the wealth sits</h3><p class="csub">Year-end composition in actual dollars</p><div id="chartComp"></div>
+      <div class="clegend"><span><i style="background:var(--indigo)"></i>Portfolio</span><span><i style="background:var(--pounamu)"></i>Working capital</span><span><i style="background:var(--amber)"></i>Emergency reserve</span></div></div>
+    <div class="chart-card"><h3>Annual cash flow</h3><p class="csub">Total income (incl. drawdown) minus total spend, by year</p><div id="chartFlow"></div>
+      <div class="clegend"><span><i style="background:var(--pounamu)"></i>Surplus</span><span><i style="background:var(--clay)"></i>Deficit</span></div></div>
+    <div class="insights"><h3>What the numbers say</h3><ul id="insightsList"></ul></div>
+  </section>
+
+  <!-- Stress test -->
+  <section class="panel hidden" id="stressPanel" role="tabpanel">
+    <p class="eyebrow">Stress test</p>
+    <h2 class="lead">Base case vs a tougher world</h2>
+    <p class="note">The conservative case runs your <b>exact plan</b> - same assets, spending and schedule - but with weaker markets, higher inflation and a longer life. Adjust its dials; the base case stays as set on the Assumptions tab.</p>
+    <div class="stress-dials" id="stressDials"></div>
+    <div class="cmp-wrap">
+      <table class="cmp"><thead><tr><th class="l">Measure</th><th>Base case</th><th>Conservative</th></tr></thead><tbody id="cmpBody"></tbody></table>
+    </div>
+    <div class="chart-card"><h3>Net worth in 2026 dollars</h3><p class="csub">Real purchasing power under each scenario</p><div id="chartStress"></div>
+      <div class="clegend"><span><i style="background:var(--indigo)"></i>Base case</span><span><i style="background:var(--clay)"></i>Conservative</span></div></div>
+    <p class="verdict" id="stressVerdict"></p>
+  </section>
+
+  <!-- Monte Carlo -->
+  <section class="panel hidden" id="mcPanel" role="tabpanel">
+    <p class="eyebrow">Monte Carlo</p>
+    <h2 class="lead">The spread of possible outcomes</h2>
+    <p class="note">Instead of one smooth return, each year's portfolio return is drawn at random from a bell curve centred on the chosen basis, with the spread set by volatility. Toggle between your <b>base</b> assumptions and the <b>conservative</b> dials from the Stress test (lower return, higher inflation, longer life, plus its one-off shock). Running it many times maps the fan of paths your wealth could take. The shading is densest where outcomes cluster (the middle 50%) and fades through the 80% and 90% ranges at the edges. The dashed line is the smooth, no-volatility projection of the same basis.</p>
+    <div class="mc-controls">
+      <div class="seg" id="mcBasis" role="group" aria-label="Assumption basis">
+        <button data-b="base" aria-pressed="true">Base</button>
+        <button data-b="cons" aria-pressed="false">Conservative</button>
+      </div>
+      <label class="infl">Volatility <input type="number" step="0.5" id="mcVol"> %</label>
+      <label class="infl">Simulations <input type="number" step="100" id="mcSims"></label>
+      <button class="btn" id="mcRun">Re-roll</button>
+    </div>
+    <div class="summary" id="mcSummary"></div>
+    <div class="chart-card"><h3>Net worth in 2026 dollars - range of outcomes</h3><p class="csub">Each band is a percentile range across the simulations</p><div id="chartMC"></div>
+      <div class="clegend"><span><i style="background:var(--indigo);opacity:.26"></i>Middle 50%</span><span><i style="background:var(--indigo);opacity:.16"></i>80% range</span><span><i style="background:var(--indigo);opacity:.10"></i>90% range</span><span><i style="background:var(--indigo)"></i>Median path</span><span><i style="background:var(--clay)"></i>Smooth path (no volatility)</span></div></div>
+    <p class="verdict" id="mcVerdict"></p>
+  </section>
+
+  <p class="footnote" id="foot"></p>
+</div>
+
+<div class="sync-banner hidden" id="syncBanner">
+  <span id="syncBannerText"></span>
+  <span class="sb-actions"><button class="btn" id="sbUseServer">Use server version</button><button class="btn" id="sbKeepMine">Keep this device's</button></span>
+</div>
+
+<div class="modal-back hidden" id="syncModal">
+  <div class="modal">
+    <h2>Device sync</h2>
+    <p class="mnote">Sync keeps this plan in step across your devices. Your data is <b>encrypted on this device</b> with your passphrase before it is sent, so the server only ever holds unreadable ciphertext. Enter the <b>same</b> passphrase and access token on each device you want in sync.</p>
+    <label class="mfield">Access token <input type="password" id="syncToken" autocomplete="off" placeholder="matches SYNC_TOKEN on the site"></label>
+    <label class="mfield">Encryption passphrase <input type="password" id="syncPass" autocomplete="off" placeholder="your secret, never sent to the server"></label>
+    <p class="mnote" id="syncModalMsg"></p>
+    <div class="mrow">
+      <button class="btn primary" id="syncEnable">Enable sync</button>
+      <button class="btn" id="syncDisable">Turn off on this device</button>
+      <button class="btn" id="syncClose">Close</button>
+    </div>
+    <p class="mnote small">The passphrase and token are stored only in this browser. There is no password recovery: if you forget the passphrase, the synced copy cannot be decrypted. Keep a JSON export as a backup.</p>
+  </div>
+</div>
+
+<script>
+/* ---------- Defaults from the workbook ---------- */
+function uid(){ return 'a'+Math.random().toString(36).slice(2,9); }
+const SEED_ASSETS = [
+  {name:"Joint",          amount:663263, bucket:"portfolio"},
+  {name:"AGW kiwi",       amount:121966, bucket:"portfolio"},
+  {name:"SJW kiwi",       amount:35000,  bucket:"portfolio"},
+  {name:"Sovereign",      amount:9000,   bucket:"working"},
+  {name:"SBS saving",     amount:15145,  bucket:"working"},
+  {name:"Westpac term",   amount:27875,  bucket:"reserve"},
+  {name:"Westpac savings",amount:14245,  bucket:"working"},
+  {name:"Bus transaction",amount:35917,  bucket:"working"},
+  {name:"Bus acc due",    amount:5000,   bucket:"working"},
+  {name:"Bus term",       amount:40000,  bucket:"reserve"},
+  {name:"Bus savings",    amount:10026,  bucket:"working"},
+];
+const SEED_SCHEDULE = {
+2026:{super:0,earn:62000,house:10000,kids:0,play:17000,oneoff:0},
+2027:{super:33120,earn:62000,house:25000,kids:20000,play:30000,oneoff:0},
+2028:{super:43917,earn:31000,house:0,kids:20000,play:30000,oneoff:0},
+2029:{super:45015,earn:0,house:0,kids:20000,play:30000,oneoff:0},
+2030:{super:46140,earn:0,house:0,kids:0,play:30000,oneoff:0},
+2031:{super:47294,earn:0,house:0,kids:0,play:30000,oneoff:0},
+2032:{super:48476,earn:0,house:0,kids:0,play:30000,oneoff:0},
+2033:{super:49688,earn:0,house:0,kids:0,play:30000,oneoff:0},
+2034:{super:50930,earn:0,house:0,kids:0,play:30000,oneoff:0},
+2035:{super:52204,earn:0,house:0,kids:0,play:30000,oneoff:0},
+2036:{super:53509,earn:0,house:0,kids:0,play:30000,oneoff:0},
+2037:{super:54846,earn:0,house:0,kids:0,play:25000,oneoff:0},
+2038:{super:56217,earn:0,house:0,kids:0,play:25000,oneoff:0},
+2039:{super:57623,earn:0,house:0,kids:0,play:25000,oneoff:0},
+2040:{super:59063,earn:0,house:0,kids:0,play:25000,oneoff:0},
+2041:{super:60540,earn:0,house:0,kids:0,play:25000,oneoff:0},
+2042:{super:62054,earn:0,house:0,kids:0,play:25000,oneoff:0},
+2043:{super:63605,earn:0,house:0,kids:0,play:15000,oneoff:0},
+2044:{super:65195,earn:0,house:0,kids:0,play:15000,oneoff:0},
+2045:{super:66825,earn:0,house:0,kids:0,play:15000,oneoff:0},
+2046:{super:68496,earn:0,house:0,kids:0,play:15000,oneoff:0},
+2047:{super:70208,earn:0,house:0,kids:0,play:15000,oneoff:0},
+2048:{super:71963,earn:0,house:0,kids:0,play:15000,oneoff:0},
+2049:{super:73762,earn:0,house:0,kids:0,play:15000,oneoff:0},
+2050:{super:75606,earn:0,house:0,kids:0,play:15000,oneoff:0},
+2051:{super:77496,earn:0,house:0,kids:0,play:15000,oneoff:0},
+2052:{super:79434,earn:0,house:0,kids:0,play:15000,oneoff:0},
+};
+const DEF_ASSUME = {
+  startYear:2026, startAge:64, endAge:90,
+  portReturn:5.8, firstYearGrowth:2.96,
+  drawStartAge:66, r1:6, phase2Age:75, r2:5, phase3Age:81, r3:4,
+  coreStart:45300, spendGrowth:2.5,
+  reserveTarget:100000, reserveReturn:1.0,
+  inflation:2.5, volatility:9.0
+};
+// Conservative stress case: same plan, tougher world (overrides applied on top of base)
+const DEF_STRESS = { portReturn:4.5, inflation:3.5, spendGrowth:3.5, endAge:95, shockPct:20, shockAge:67 };
+
+/* ---------- State ---------- */
+const KEY = "projection.v1";
+let state = load() || fresh();
+function fresh(){
+  return {
+    assets: SEED_ASSETS.map(a=>({id:uid(),...a})),
+    assume: {...DEF_ASSUME},
+    stress: {...DEF_STRESS},
+    schedule: JSON.parse(JSON.stringify(SEED_SCHEDULE)),
+    labels: {house:"House", kids:"Kids", play:"Play"},
+    view:"nominal", tab:"assets", mcSims:1000, mcBasis:"base"
+  };
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(stateSnapshot())); }catch(e){} if(typeof syncSchedulePush==="function") syncSchedulePush(); }
+function stateSnapshot(){ return {assets:state.assets,assume:state.assume,stress:state.stress,schedule:state.schedule,labels:state.labels,view:state.view,mcSims:state.mcSims,mcBasis:state.mcBasis}; }
+function load(){
+  try{
+    const raw=localStorage.getItem(KEY); if(!raw) return null;
+    const s=JSON.parse(raw); const base=fresh();
+    if(Array.isArray(s.assets)&&s.assets.length) base.assets=s.assets.map(a=>({id:a.id||uid(),name:a.name||"",amount:+a.amount||0,bucket:["portfolio","working","reserve"].includes(a.bucket)?a.bucket:"working"}));
+    if(s.assume) base.assume={...DEF_ASSUME,...s.assume};
+    if(s.stress) base.stress={...DEF_STRESS,...s.stress};
+    if(s.schedule) base.schedule=Object.assign(base.schedule,s.schedule);
+    if(s.labels) base.labels={...base.labels,...s.labels};
+    if(s.mcSims) base.mcSims=+s.mcSims;
+    if(s.mcBasis) base.mcBasis=s.mcBasis==="cons"?"cons":"base";
+    base.view=s.view==="real"?"real":"nominal";
+    return base;
+  }catch(e){ return null; }
+}
+
+/* ---------- Helpers ---------- */
+const sum=a=>a.reduce((x,y)=>x+(+y||0),0);
+const r0=v=>Math.round(+v||0);
+function money(n){ const neg=n<0; return (neg?"-$":"$")+Math.abs(Math.round(n)).toLocaleString("en-NZ"); }
+function moneyShort(n){ const a=Math.abs(n),s=n<0?"-":""; if(a>=1e6)return s+"$"+(a/1e6).toFixed(2)+"m"; if(a>=1e3)return s+"$"+Math.round(a/1e3)+"k"; return s+"$"+Math.round(a); }
+function pct(n){ return (n*100).toFixed(1)+"%"; }
+const A=()=>state.assume;
+function portfolioSeed(){ return sum(state.assets.filter(a=>a.bucket==="portfolio").map(a=>a.amount)); }
+function workingSeed(){ return sum(state.assets.filter(a=>a.bucket==="working").map(a=>a.amount)); }
+function reserveSeed(){ return sum(state.assets.filter(a=>a.bucket==="reserve").map(a=>a.amount)); }
+function sched(y, gp){
+  if(state.schedule[y]) return state.schedule[y];
+  gp = (gp==null ? +A().spendGrowth : gp);
+  const keys=Object.keys(state.schedule).map(Number);
+  if(!keys.length) return {super:0,earn:0,house:0,kids:0,play:0,oneoff:0};
+  const below=keys.filter(k=>k<y);
+  if(below.length){
+    // beyond the entered schedule: continue super with indexation, carry recurring items, no repeat one-offs
+    const base=state.schedule[Math.max(...below)]; const gap=y-Math.max(...below);
+    const grow=Math.pow(1+gp/100, gap);
+    return {super:Math.round((+base.super||0)*grow), earn:+base.earn||0, house:+base.house||0, kids:+base.kids||0, play:+base.play||0, oneoff:0};
+  }
+  const above=state.schedule[Math.min(...keys)];  // year before all entered years
+  return {super:+above.super||0, earn:+above.earn||0, house:+above.house||0, kids:+above.kids||0, play:+above.play||0, oneoff:0};
+}
+function realFactor(year, a){ a=a||A(); return 1/Math.pow(1+(+a.inflation)/100, year-(+a.startYear)); }
+
+/* ---------- Core projection ---------- */
+function project(a, opts){
+  a=a||A(); opts=opts||{}; const sy=+a.startYear, sa=+a.startAge, ea=+a.endAge;
+  const n=Math.max(0, ea-sa);
+  const shockPct=opts.shock&&+opts.shock.pct?+opts.shock.pct:0, shockAge=opts.shock?+opts.shock.age:null;
+  const rows=[]; let portYB=portfolioSeed(), prevWork=0, prevRes=0;
+  for(let i=0;i<=n;i++){
+    const year=sy+i, age=sa+i;
+    let g=(i===0? +a.firstYearGrowth : +a.portReturn)/100;
+    if(opts.returns && i>0 && opts.returns[i]!=null) g=opts.returns[i];   // Monte Carlo path
+    const afterGrowth=portYB*(1+g); const growthAmt=afterGrowth-portYB;
+    let rate=0, phase="p0";
+    if(age>= +a.drawStartAge){
+      if(age>= +a.phase3Age){ rate=+a.r3; phase="p4"; }
+      else if(age>= +a.phase2Age){ rate=+a.r2; phase="p5"; }
+      else { rate=+a.r1; phase="p6"; }
+    }
+    rate/=100;
+    const draw=portYB*rate;
+    const sc=sched(year, +a.spendGrowth); const oneoff=+sc.oneoff||0;
+    let portYE=afterGrowth-draw-oneoff;
+    if(shockPct && shockAge===age) portYE*=(1-shockPct/100);   // one-off market shock
+    const core=(+a.coreStart)*Math.pow(1+(+a.spendGrowth)/100, i);
+    const house=+sc.house||0, kids=+sc.kids||0, play=+sc.play||0, sup=+sc.super||0, earn=+sc.earn||0;
+    const totalSpend=core+house+kids+play;
+    const totalIncome=draw+sup+earn;
+    let working, reserve;
+    if(i===0){ working=workingSeed()+(totalIncome-totalSpend); reserve=reserveSeed(); }
+    else { working=prevWork+(totalIncome-totalSpend); reserve=prevRes*(1+(+a.reserveReturn)/100); }
+    const netWorth=portYE+working+reserve;
+    rows.push({year,age,portYB,growthAmt,draw,oneoff,portYE,sup,earn,totalIncome,core,house,kids,play,totalSpend,working,reserve,netWorth,phase,rate});
+    portYB=portYE; prevWork=working; prevRes=reserve;
+  }
+  return rows;
+}
+
+/* ---------- Assets tab ---------- */
+function renderAssets(){
+  const body=document.getElementById("assetsBody"); const total=portfolioSeed()+workingSeed()+reserveSeed();
+  body.innerHTML = state.assets.map(a=>{
+    const share=total>0? a.amount/total : 0;
+    return `<tr data-id="${a.id}">
+      <td class="l"><input class="nm" value="${(a.name||'').replace(/"/g,'&quot;')}" aria-label="Asset name"></td>
+      <td><input class="cell amt" type="number" step="1" min="0" value="${r0(a.amount)}" aria-label="Amount"></td>
+      <td class="l"><select class="bucket"><option value="portfolio"${a.bucket==='portfolio'?' selected':''}>Portfolio</option><option value="working"${a.bucket==='working'?' selected':''}>Working capital</option><option value="reserve"${a.bucket==='reserve'?' selected':''}>Reserve</option></select></td>
+      <td class="num">${pct(share)}</td>
+      <td><button class="delrow" title="Remove" aria-label="Remove ${a.name}">&times;</button></td></tr>`;
+  }).join("");
+  body.querySelectorAll("tr").forEach(tr=>{
+    const id=tr.dataset.id; const a=state.assets.find(x=>x.id===id);
+    tr.querySelector(".nm").addEventListener("input",e=>{ a.name=e.target.value; save(); paintAssetsTotals(); });
+    tr.querySelector(".amt").addEventListener("input",e=>{ a.amount=r0(e.target.value); save(); paintAssetsTotals(); });
+    tr.querySelector(".bucket").addEventListener("change",e=>{ a.bucket=e.target.value; save(); renderAssets(); });
+    tr.querySelector(".delrow").addEventListener("click",()=>{ state.assets=state.assets.filter(x=>x.id!==id); save(); renderAssets(); });
+  });
+  paintAssetsTotals();
+}
+function paintAssetsTotals(){
+  const p=portfolioSeed(), w=workingSeed(), rv=reserveSeed(), t=p+w+rv;
+  document.getElementById("aTotal").textContent=money(t);
+  document.getElementById("aPort").textContent=money(p);
+  document.getElementById("aWork").textContent=money(w);
+  document.getElementById("aRes").textContent=money(rv);
+  document.getElementById("aPortPct").textContent=t>0?pct(p/t):"-";
+  document.getElementById("aWorkPct").textContent=t>0?pct(w/t):"-";
+  document.getElementById("aResPct").textContent=t>0?pct(rv/t):"-";
+  document.getElementById("kPort").textContent=money(p);
+  document.getElementById("kWork").textContent=money(w);
+  document.getElementById("kRes").textContent=money(rv);
+  const sb=document.getElementById("splitbar");
+  sb.querySelector(".p").style.width=(t>0?p/t*100:0)+"%";
+  sb.querySelector(".w").style.width=(t>0?w/t*100:0)+"%";
+  sb.querySelector(".r").style.width=(t>0?rv/t*100:0)+"%";
+  document.querySelectorAll("#assetsBody tr").forEach(tr=>{ const a=state.assets.find(x=>x.id===tr.dataset.id); if(a) tr.querySelector(".num").textContent = t>0?pct(a.amount/t):"-"; });
+}
+
+/* ---------- Assumptions tab ---------- */
+const ASSUME_FIELDS = [
+  {h:"Timeline", items:[["startYear","Start year",""],["startAge","Start age",""],["endAge","Project to age",""]]},
+  {h:"Portfolio growth", items:[["portReturn","Net return","%"],["firstYearGrowth","First-year growth","%"]]},
+  {h:"6 / 5 / 4 drawdown", items:[["drawStartAge","Drawdown starts at age",""],["r1","Phase 1 rate","%"],["phase2Age","Phase 2 from age",""],["r2","Phase 2 rate","%"],["phase3Age","Phase 3 from age",""],["r3","Phase 3 rate","%"]]},
+  {h:"Spending", items:[["coreStart","Core spend (start year)","$"],["spendGrowth","Spending growth","%"]]},
+  {h:"Emergency reserve", items:[["reserveReturn","Reserve return","%"]]},
+  {h:"Inflation", items:[["inflation","For 2026-dollar view","%"]]},
+];
+function renderAssume(){
+  const grid=document.getElementById("assumeGrid");
+  grid.innerHTML=ASSUME_FIELDS.map(g=>`<div class="acard"><h3>${g.h}</h3>${g.items.map(([k,lbl,suf])=>`
+    <div class="field"><label for="f_${k}">${lbl}</label><span class="in"><input id="f_${k}" data-k="${k}" type="number" step="${suf==='%'?'0.1':'1'}" value="${A()[k]}"><span class="suffix">${suf}</span></span></div>`).join("")}</div>`).join("");
+  grid.querySelectorAll("input[data-k]").forEach(inp=>{
+    inp.addEventListener("input",e=>{ const k=e.target.dataset.k; const v=parseFloat(e.target.value); A()[k]=isNaN(v)?0:v; save(); if(document.getElementById("inflInput")) document.getElementById("inflInput").value=A().inflation; renderProjection(); renderDashboard(); });
+  });
+}
+
+/* ---------- Projection tab ---------- */
+const PCOLS = [
+  {g:"",span:2},{g:"Long-term portfolio",span:5},{g:"Income (after tax)",span:3},{g:"Spending",span:5},{g:"Reserves",span:2},{g:"",span:1}
+];
+function updateProjDerived(){
+  const rows=project();
+  const real=state.view==="real"; const f=y=>real?realFactor(y):1;
+  rows.forEach(r=>{
+    const tr=document.querySelector(`#projBody tr[data-y="${r.year}"]`); if(!tr) return;
+    const set=(sel,val)=>{ const el=tr.querySelector(sel); if(el) el.textContent=val; };
+    set(".c-portYB", money(r.portYB*f(r.year)));
+    set(".c-growth", money(r.growthAmt*f(r.year)));
+    set(".c-draw", r.draw?money(r.draw*f(r.year)):'-');
+    set(".c-portYE", money(r.portYE*f(r.year)));
+    set(".c-income", money(r.totalIncome*f(r.year)));
+    set(".c-core", money(r.core*f(r.year)));
+    set(".c-spend", money(r.totalSpend*f(r.year)));
+    set(".c-working", money(r.working*f(r.year)));
+    set(".c-reserve", money(r.reserve*f(r.year)));
+    set(".c-net", money(r.netWorth*f(r.year)));
+  });
+}
+function renderProjection(){
+  const rows=project(); const real=state.view==="real"; const f=y=>real?realFactor(y):1;
+  document.getElementById("inflInput").value=A().inflation;
+  document.getElementById("viewNote").innerHTML = real
+    ? `Every figure deflated to <b>${A().startYear}</b> purchasing power at ${A().inflation}% inflation. Read-only in this view.`
+    : `Highlighted cells are editable: super, earnings, house, kids, play and one-off withdrawals.`;
+  // header (two rows: groups + columns)
+  const head=document.getElementById("projHead");
+  const L=state.labels||{house:"House",kids:"Kids",play:"Play"};
+  const escA=s=>String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;");
+  const hdr=k=>`<input class="hdr-edit" data-lk="${k}" value="${escA(L[k]||"")}" title="Rename column" aria-label="Rename ${k} column" maxlength="18">`;
+  head.innerHTML =
+    `<tr><th class="l sticky"></th>`+PCOLS.slice(1).map(c=>`<th colspan="${c.span}" class="colgroup">${c.g}</th>`).join("")+`</tr>`+
+    `<tr><th class="l sticky">Year</th><th>Age</th>`+
+    `<th>Port. YB</th><th>+Growth</th><th>Drawdown</th><th>One-off</th><th>Port. YE</th>`+
+    `<th>Super</th><th>Earnings</th><th>Income</th>`+
+    `<th>Core</th><th>${hdr('house')}</th><th>${hdr('kids')}</th><th>${hdr('play')}</th><th>Spend</th>`+
+    `<th>Working cap.</th><th>Reserve</th><th>Net worth</th></tr>`;
+  head.querySelectorAll("input.hdr-edit").forEach(inp=>{
+    inp.addEventListener("input",e=>{ if(!state.labels) state.labels={house:"House",kids:"Kids",play:"Play"}; state.labels[e.target.dataset.lk]=e.target.value; save(); });
+  });
+  const body=document.getElementById("projBody");
+  const ed=(y,key,val)=> real
+      ? `<td class="num">${money(val*f(y))}</td>`
+      : `<td><input class="cell" type="number" step="1" data-y="${y}" data-k="${key}" value="${r0(val)}" aria-label="${key} ${y}"></td>`;
+  body.innerHTML = rows.map(r=>`<tr data-y="${r.year}">
+      <td class="l sticky num">${r.year}</td><td class="num">${r.age} <span class="phase ${r.phase}">${r.phase==='p0'?'-':(r.rate*100).toFixed(0)+'%'}</span></td>
+      <td class="num sec-port c-portYB">${money(r.portYB*f(r.year))}</td><td class="num sec-port c-growth">${money(r.growthAmt*f(r.year))}</td>
+      <td class="num sec-port c-draw">${r.draw?money(r.draw*f(r.year)):'-'}</td>${ed(r.year,'oneoff',r.oneoff)}<td class="num sec-port c-portYE">${money(r.portYE*f(r.year))}</td>
+      ${ed(r.year,'super',r.sup)}${ed(r.year,'earn',r.earn)}<td class="num c-income">${money(r.totalIncome*f(r.year))}</td>
+      <td class="num c-core">${money(r.core*f(r.year))}</td>${ed(r.year,'house',r.house)}${ed(r.year,'kids',r.kids)}${ed(r.year,'play',r.play)}<td class="num c-spend">${money(r.totalSpend*f(r.year))}</td>
+      <td class="num sec-save c-working">${money(r.working*f(r.year))}</td><td class="num sec-save c-reserve">${money(r.reserve*f(r.year))}</td>
+      <td class="num net c-net">${money(r.netWorth*f(r.year))}</td></tr>`).join("");
+  if(!real){
+    body.querySelectorAll("input.cell").forEach(inp=>{
+      inp.addEventListener("input",e=>{
+        const y=+e.target.dataset.y, k=e.target.dataset.k;
+        if(!state.schedule[y]) state.schedule[y]={...sched(y)};
+        state.schedule[y][k]=r0(e.target.value); save(); updateProjDerived();
+      });
+    });
+  }
+  const _gw=document.getElementById("projGridWrap"), _sp=document.getElementById("projScrollSpacer");
+  if(_gw&&_sp) _sp.style.width=_gw.scrollWidth+"px";
+  const last=rows[rows.length-1];
+  document.getElementById("projFoot").innerHTML = `Net worth is year-end portfolio plus working capital plus emergency reserve. Drawdown is taken as a percent of the year-begin portfolio (${A().r1}/${A().r2}/${A().r3} by age band). Projection runs ${rows[0].year} to ${last.year}.`;
+}
+
+/* ---------- Charts (hand-drawn SVG) ---------- */
+function niceMax(v){ if(v<=0)return 1; const p=Math.pow(10,Math.floor(Math.log10(v))); const f=v/p; const n=f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10; return n*p; }
+function lineChart(series, years){
+  const W=860,H=300,pl=66,pr=14,pt=12,pb=30; const iw=W-pl-pr, ih=H-pt-pb;
+  let max=0,min=0; series.forEach(s=>s.data.forEach(v=>{max=Math.max(max,v);min=Math.min(min,v);}));
+  const top=niceMax(max); const bot=min<0?-niceMax(-min):0; const span=top-bot||1;
+  const x=i=>pl+(years.length<=1?iw/2:iw*i/(years.length-1)); const y=v=>pt+ih-(v-bot)/span*ih;
+  let g="";
+  for(let k=0;k<=4;k++){ const val=bot+span*k/4; const yy=y(val); g+=`<line x1="${pl}" y1="${yy.toFixed(1)}" x2="${W-pr}" y2="${yy.toFixed(1)}" stroke="var(--hair)" stroke-width="1"/><text x="${pl-8}" y="${yy+3}" text-anchor="end" font-size="10" fill="var(--muted)" font-family="var(--mono)">${moneyShort(val)}</text>`; }
+  const step=Math.ceil(years.length/8);
+  years.forEach((yr,i)=>{ if(i%step===0||i===years.length-1) g+=`<text x="${x(i)}" y="${H-10}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--mono)">${yr}</text>`; });
+  series.forEach(s=>{ const d=s.data.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
+    g+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2.4" ${s.dash?`stroke-dasharray="6 4"`:""} stroke-linejoin="round"/>`;
+    const li=s.data.length-1; g+=`<circle cx="${x(li).toFixed(1)}" cy="${y(s.data[li]).toFixed(1)}" r="3.4" fill="${s.color}"/>`; });
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img">${g}</svg>`;
+}
+function areaChart(stacks, years, colors){
+  // stacks: array of series arrays (bottom to top)
+  const W=860,H=300,pl=66,pr=14,pt=12,pb=30; const iw=W-pl-pr, ih=H-pt-pb;
+  const totals=years.map((_,i)=>sum(stacks.map(s=>s[i]))); const top=niceMax(Math.max(...totals));
+  const x=i=>pl+(years.length<=1?iw/2:iw*i/(years.length-1)); const y=v=>pt+ih-v/top*ih;
+  let g="";
+  for(let k=0;k<=4;k++){ const val=top*k/4; const yy=y(val); g+=`<line x1="${pl}" y1="${yy.toFixed(1)}" x2="${W-pr}" y2="${yy.toFixed(1)}" stroke="var(--hair)" stroke-width="1"/><text x="${pl-8}" y="${yy+3}" text-anchor="end" font-size="10" fill="var(--muted)" font-family="var(--mono)">${moneyShort(val)}</text>`; }
+  const step=Math.ceil(years.length/8);
+  years.forEach((yr,i)=>{ if(i%step===0||i===years.length-1) g+=`<text x="${x(i)}" y="${H-10}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--mono)">${yr}</text>`; });
+  let base=years.map(()=>0);
+  stacks.forEach((s,si)=>{ const upper=s.map((v,i)=>base[i]+v);
+    const top1=upper.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
+    const bot1=base.map((v,i)=>`L${x(years.length-1-i).toFixed(1)} ${y(base[years.length-1-i]).toFixed(1)}`).join(" ");
+    g+=`<path d="${top1} ${bot1} Z" fill="${colors[si]}" fill-opacity="0.85" stroke="${colors[si]}" stroke-width="0.6"/>`;
+    base=upper; });
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img">${g}</svg>`;
+}
+function barChart(vals, years){
+  const W=860,H=240,pl=66,pr=14,pt=12,pb=30; const iw=W-pl-pr, ih=H-pt-pb;
+  const mag=Math.max(1,...vals.map(v=>Math.abs(v))); const top=niceMax(mag);
+  const x=i=>pl+iw*(i+0.5)/years.length; const bw=Math.max(2, iw/years.length*0.66);
+  const y0=pt+ih/ (1+ (top? (top)/(2*top):0)); // mid baseline
+  const y=v=>pt+ih/2 - v/top*(ih/2);
+  let g=`<line x1="${pl}" y1="${(pt+ih/2).toFixed(1)}" x2="${W-pr}" y2="${(pt+ih/2).toFixed(1)}" stroke="var(--hair-strong)" stroke-width="1"/>`;
+  [top,top/2,-top/2,-top].forEach(val=>{ const yy=y(val); g+=`<text x="${pl-8}" y="${yy+3}" text-anchor="end" font-size="10" fill="var(--muted)" font-family="var(--mono)">${moneyShort(val)}</text>`; });
+  const step=Math.ceil(years.length/8);
+  years.forEach((yr,i)=>{ if(i%step===0||i===years.length-1) g+=`<text x="${x(i)}" y="${H-10}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--mono)">${yr}</text>`; });
+  vals.forEach((v,i)=>{ const yy=y(v); const h=Math.abs(yy-(pt+ih/2)); const col=v>=0?"var(--pounamu)":"var(--clay)";
+    g+=`<rect x="${(x(i)-bw/2).toFixed(1)}" y="${(v>=0?yy:pt+ih/2).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0.5,h).toFixed(1)}" rx="1.5" fill="${col}"/>`; });
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img">${g}</svg>`;
+}
+
+/* ---------- Dashboard ---------- */
+function renderDashboard(){
+  const rows=project(); const years=rows.map(r=>r.year);
+  const first=rows[0], last=rows[rows.length-1];
+  const realEnd=last.netWorth*realFactor(last.year);
+  const peak=rows.reduce((m,r)=>r.portYE>m.portYE?r:m, rows[0]);
+  const minWork=rows.reduce((m,r)=>r.working<m.working?r:m, rows[0]);
+  const depleted=rows.find(r=>r.portYE<=0);
+  const totalDraw=sum(rows.map(r=>r.draw)), totalSpend=sum(rows.map(r=>r.totalSpend)), totalIncome=sum(rows.map(r=>r.totalIncome));
+  const realChange=(realEnd-first.netWorth)/first.netWorth;
+
+  document.getElementById("c1title").textContent="Net worth across the horizon";
+  document.getElementById("c1sub").textContent=`From age ${first.age} (${first.year}) to age ${last.age} (${last.year})`;
+
+  const cards=[
+    {lbl:`Net worth now (${first.year})`, val:money(first.netWorth), sub:"actual dollars", lead:true},
+    {lbl:`Net worth at age ${last.age}`, val:money(last.netWorth), sub:`${money(realEnd)} in ${first.year} dollars`},
+    {lbl:"Real change to "+last.year, val:(realChange>=0?"+":"")+(realChange*100).toFixed(0)+"%", sub:"after inflation, "+first.year+" dollars", cls:realChange>=0?"pos":"neg"},
+    {lbl:"Portfolio sustainability", val:depleted?("Depletes "+depleted.year):"Never depletes", sub:depleted?"portfolio hits zero":"portfolio lasts the horizon", cls:depleted?"neg":"pos"},
+    {lbl:"Peak portfolio", val:money(peak.portYE), sub:"in "+peak.year+" (age "+peak.age+")"},
+    {lbl:"Lowest working capital", val:money(minWork.working), sub:"in "+minWork.year, cls:minWork.working<0?"neg":""},
+    {lbl:"Total drawn from portfolio", val:money(totalDraw), sub:"over "+rows.length+" years"},
+    {lbl:"Total spend vs income", val:money(totalSpend), sub:money(totalIncome)+" income incl. drawdown"},
+  ];
+  document.getElementById("summary").innerHTML=cards.map(c=>`<div class="stat${c.lead?' lead-card':''}"><div class="slbl">${c.lbl}</div><div class="sval ${c.cls||''}">${c.val}</div><div class="ssub">${c.sub}</div></div>`).join("");
+
+  document.getElementById("chartNet").innerHTML=lineChart([
+    {color:"var(--indigo)", data:rows.map(r=>r.netWorth)},
+    {color:"var(--clay)", dash:true, data:rows.map(r=>r.netWorth*realFactor(r.year))},
+  ], years);
+  document.getElementById("chartComp").innerHTML=areaChart(
+    [rows.map(r=>Math.max(0,r.working)), rows.map(r=>r.reserve), rows.map(r=>r.portYE)],
+    years, ["var(--pounamu)","var(--amber)","var(--indigo)"]);
+  document.getElementById("chartFlow").innerHTML=barChart(rows.map(r=>r.totalIncome-r.totalSpend), years);
+
+  const ins=[];
+  ins.push(`Starting from <b>${money(first.netWorth)}</b> in ${first.year}, projected net worth reaches <b>${money(last.netWorth)}</b> by age ${last.age} - that is <b>${money(realEnd)}</b> in ${first.year} dollars, a real ${realChange>=0?'gain':'fall'} of <b>${Math.abs(realChange*100).toFixed(0)}%</b> after ${A().inflation}% inflation.`);
+  ins.push(depleted
+    ? `At these settings the portfolio is exhausted in <b>${depleted.year}</b> (age ${depleted.age}). Lower the drawdown rates or spending to push that out.`
+    : `The portfolio is never exhausted; it peaks at <b>${money(peak.portYE)}</b> in ${peak.year} and the 6/5/4 drawdown stays within its growth.`);
+  const deficits=rows.filter(r=>r.totalIncome-r.totalSpend<0).length;
+  ins.push(deficits
+    ? `Cash flow runs a deficit in <b>${deficits}</b> of ${rows.length} years, drawn from working capital, which bottoms out at <b>${money(minWork.working)}</b> in ${minWork.year}.`
+    : `Income covers spending every year, so working capital only grows.`);
+  if(minWork.working<0) ins.push(`Working capital goes <b class="neg">negative</b> in ${minWork.year}. Consider a larger reserve or trimming the lumpy house and gift years.`);
+  ins.push(`Across the horizon you draw <b>${money(totalDraw)}</b> from the portfolio while spending <b>${money(totalSpend)}</b> against <b>${money(totalIncome)}</b> of after-tax income (drawdown included).`);
+  document.getElementById("insightsList").innerHTML=ins.map(t=>`<li>${t}</li>`).join("");
+}
+
+/* ---------- Stress test ---------- */
+function consAssume(){ return {...A(), ...state.stress}; }
+function summarize(rows, a){
+  const first=rows[0], last=rows[rows.length-1];
+  const rf=realFactor(last.year, a);
+  const depleted=rows.find(r=>r.portYE<=0);
+  const minW=rows.reduce((m,r)=>r.working<m.working?r:m, rows[0]);
+  const peak=rows.reduce((m,r)=>r.portYE>m.portYE?r:m, rows[0]);
+  return { first,last, endNom:last.netWorth, endReal:last.netWorth*rf,
+    realChange:(last.netWorth*rf-first.netWorth)/first.netWorth,
+    portEndReal:last.portYE*rf, peak, depleted, minW,
+    totalDraw:sum(rows.map(r=>r.draw)) };
+}
+function renderStress(){
+  const baseA=A(), consA=consAssume();
+  const shock={pct:state.stress.shockPct, age:state.stress.shockAge};
+  const baseRows=project(baseA), consRows=project(consA, {shock});
+  const B=summarize(baseRows, baseA), C=summarize(consRows, consA);
+  const dials=[["portReturn","Portfolio return","%"],["inflation","Inflation","%"],["spendGrowth","Spending growth","%"],["endAge","Project to age",""]];
+  document.getElementById("stressDials").innerHTML=dials.map(([k,lbl,suf])=>`
+    <div class="sdial"><div class="sdlbl">${lbl}</div><div class="sdrow">
+      <span class="sdbase">${baseA[k]}${suf}</span><span class="sdarrow">&rarr;</span>
+      <span class="sdin"><input type="number" step="${suf==='%'?'0.1':'1'}" data-sk="${k}" value="${state.stress[k]}" aria-label="Conservative ${lbl}"><span class="suffix">${suf}</span></span></div></div>`).join("")
+    + `<div class="sdial shock"><div class="sdlbl">One-off market shock</div><div class="sdrow">
+        <span class="sdin"><span class="suffix" style="width:auto">-</span><input type="number" step="1" min="0" data-sk="shockPct" value="${state.stress.shockPct}" aria-label="Shock size"><span class="suffix">%</span></span>
+        <span class="sdbase">at age</span>
+        <span class="sdin"><input type="number" step="1" data-sk="shockAge" value="${state.stress.shockAge}" aria-label="Shock age"></span></div></div>`;
+  document.getElementById("stressDials").querySelectorAll("input[data-sk]").forEach(inp=>{
+    inp.addEventListener("input",e=>{ const k=e.target.dataset.sk; const v=parseFloat(e.target.value); state.stress[k]=isNaN(v)?0:v; save(); renderStress(); });
+  });
+  const chg=n=>`<span class="${n>=0?'pos':'neg'}">${n>=0?'+':''}${(n*100).toFixed(0)}%</span>`;
+  const sust=s=> s.depleted?`<span class="neg">depletes ${s.depleted.year}</span>`:`<span class="pos">lasts</span>`;
+  const rowsHtml=[
+    ["Horizon", `to age ${B.last.age} (${B.last.year})`, `to age ${C.last.age} (${C.last.year})`],
+    ["Net worth at end (actual $)", money(B.endNom), money(C.endNom)],
+    ["Net worth at end (2026 $)", money(B.endReal), money(C.endReal)],
+    ["Real change from 2026", chg(B.realChange), chg(C.realChange)],
+    ["Portfolio at end (2026 $)", money(B.portEndReal), money(C.portEndReal)],
+    ["Portfolio sustainability", sust(B), sust(C)],
+    ["Lowest working capital", `${money(B.minW.working)} (${B.minW.year})`, `<span class="${C.minW.working<0?'neg':''}">${money(C.minW.working)} (${C.minW.year})</span>`],
+    ["Total drawn from portfolio", money(B.totalDraw), money(C.totalDraw)],
+  ];
+  document.getElementById("cmpBody").innerHTML=rowsHtml.map(r=>`<tr><td class="l">${r[0]}</td><td class="base-col">${r[1]}</td><td>${r[2]}</td></tr>`).join("");
+  document.getElementById("chartStress").innerHTML=lineChartXY([
+    {color:"var(--indigo)", data:baseRows.map(r=>[r.year, r.netWorth*realFactor(r.year, baseA)])},
+    {color:"var(--clay)", dash:true, data:consRows.map(r=>[r.year, r.netWorth*realFactor(r.year, consA)])},
+  ]);
+  const gap=Math.abs(B.endReal-C.endReal);
+  let tail;
+  if(C.depleted) tail=`The portfolio <b class="hi">runs out in ${C.depleted.year}</b>.`;
+  else if(C.minW.working<0) tail=`The portfolio lasts, but working capital turns <b class="hi">negative in ${C.minW.year}</b>.`;
+  else tail=`The portfolio still lasts the full horizon, with working capital bottoming at ${money(C.minW.working)} in ${C.minW.year}.`;
+  const real=C.realChange>=0?`Even stressed, real wealth holds up.`:`Stressed, real wealth falls <b class="hi">${Math.abs(C.realChange*100).toFixed(0)}%</b> over the horizon.`;
+  const shockTxt = (state.stress.shockPct>0) ? ` It also absorbs a <b class="hi">${state.stress.shockPct}% market fall at age ${state.stress.shockAge}</b>.` : ``;
+  document.getElementById("stressVerdict").innerHTML=
+    `In the conservative case - <b>${consA.portReturn}%</b> returns, <b>${consA.inflation}%</b> inflation, living to <b>${consA.endAge}</b> - real net worth lands at <b class="hi">${money(C.endReal)}</b> by ${C.last.year}, versus <b>${money(B.endReal)}</b> in the base case (a gap of <b class="hi">${money(gap)}</b>).${shockTxt} ${tail} ${real}`;
+}
+function lineChartXY(series){
+  const W=860,H=300,pl=66,pr=14,pt=12,pb=30, iw=W-pl-pr, ih=H-pt-pb;
+  let xs=[],ys=[]; series.forEach(s=>s.data.forEach(d=>{xs.push(d[0]);ys.push(d[1]);}));
+  const xmin=Math.min(...xs), xmax=Math.max(...xs);
+  const max=Math.max(0,...ys), min=Math.min(0,...ys);
+  const top=niceMax(max); const bot=min<0?-niceMax(-min):0; const span=(top-bot)||1;
+  const X=x=>pl+(xmax===xmin?iw/2:iw*(x-xmin)/(xmax-xmin)); const Y=v=>pt+ih-(v-bot)/span*ih;
+  let g="";
+  for(let k=0;k<=4;k++){ const val=bot+span*k/4, yy=Y(val); g+=`<line x1="${pl}" y1="${yy.toFixed(1)}" x2="${W-pr}" y2="${yy.toFixed(1)}" stroke="var(--hair)" stroke-width="1"/><text x="${pl-8}" y="${yy+3}" text-anchor="end" font-size="10" fill="var(--muted)" font-family="var(--mono)">${moneyShort(val)}</text>`; }
+  const yrs=[...new Set(xs)].sort((a,b)=>a-b); const step=Math.ceil(yrs.length/8);
+  yrs.forEach((yr,i)=>{ if(i%step===0||i===yrs.length-1) g+=`<text x="${X(yr).toFixed(1)}" y="${H-10}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--mono)">${yr}</text>`; });
+  series.forEach(s=>{ const d=s.data.map((p,i)=>`${i?'L':'M'}${X(p[0]).toFixed(1)} ${Y(p[1]).toFixed(1)}`).join(" ");
+    g+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2.4" ${s.dash?'stroke-dasharray="6 4"':''} stroke-linejoin="round"/>`;
+    const L=s.data[s.data.length-1]; g+=`<circle cx="${X(L[0]).toFixed(1)}" cy="${Y(L[1]).toFixed(1)}" r="3.4" fill="${s.color}"/>`; });
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img">${g}</svg>`;
+}
+
+/* ---------- Monte Carlo ---------- */
+function mulberry32(seed){ return function(){ let t=seed+=0x6D2B79F5; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
+function gauss(rng){ let u=0,v=0; while(u===0)u=rng(); while(v===0)v=rng(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+function quantile(sorted,q){ const pos=(sorted.length-1)*q, b=Math.floor(pos), rest=pos-b; return sorted[b+1]!==undefined ? sorted[b]+rest*(sorted[b+1]-sorted[b]) : sorted[b]; }
+function monteCarlo(a, vol, sims, seed, shock){
+  const rng=mulberry32(seed>>>0); const mu=(+a.portReturn)/100, sd=(+vol)/100;
+  const nY=Math.max(0,(+a.endAge)-(+a.startAge))+1;
+  const byYear=Array.from({length:nY},()=>new Float64Array(sims));
+  const years=[]; let depl=0, negW=0; const endReal=new Float64Array(sims);
+  const start=project(a)[0].netWorth;
+  for(let s=0;s<sims;s++){
+    const returns=new Array(nY); for(let i=0;i<nY;i++) returns[i]=mu+sd*gauss(rng);
+    const rows=project(a,{returns, shock});
+    let d=false,nw=false;
+    for(let i=0;i<nY;i++){ const r=rows[i]; if(s===0) years.push(r.year); const rv=r.netWorth*realFactor(r.year,a); byYear[i][s]=rv; if(r.portYE<=0)d=true; if(r.working<0)nw=true; }
+    if(d)depl++; if(nw)negW++; endReal[s]=byYear[nY-1][s];
+  }
+  const pctls=[5,10,25,50,75,90,95];
+  const bands=byYear.map(arr=>{ const a2=Array.from(arr).sort((x,y)=>x-y); return pctls.map(p=>quantile(a2,p/100)); });
+  const endSorted=Array.from(endReal).sort((x,y)=>x-y);
+  const losses=endSorted.filter(v=>v<start).length;
+  return { years, bands, pctls,
+    pLast:1-depl/sims, pWorkPos:1-negW/sims, pRealLoss:losses/sims,
+    endMed:quantile(endSorted,0.5), endLo:quantile(endSorted,0.05), endHi:quantile(endSorted,0.95),
+    start };
+}
+function fanChart(years, bands, pctls, baseSeries){
+  const W=860,H=320,pl=66,pr=14,pt=12,pb=30, iw=W-pl-pr, ih=H-pt-pb;
+  const idx=p=>pctls.indexOf(p);
+  let lo=Infinity,hi=-Infinity; bands.forEach(b=>{ lo=Math.min(lo,b[0]); hi=Math.max(hi,b[b.length-1]); }); baseSeries.forEach(d=>{hi=Math.max(hi,d[1]);lo=Math.min(lo,d[1]);});
+  const top=niceMax(hi); const bot=lo<0?-niceMax(-lo):0; const span=(top-bot)||1;
+  const xmin=years[0], xmax=years[years.length-1];
+  const X=x=>pl+(xmax===xmin?iw/2:iw*(x-xmin)/(xmax-xmin)); const Y=v=>pt+ih-(v-bot)/span*ih;
+  let g="";
+  for(let k=0;k<=4;k++){ const val=bot+span*k/4, yy=Y(val); g+=`<line x1="${pl}" y1="${yy.toFixed(1)}" x2="${W-pr}" y2="${yy.toFixed(1)}" stroke="var(--hair)" stroke-width="1"/><text x="${pl-8}" y="${yy+3}" text-anchor="end" font-size="10" fill="var(--muted)" font-family="var(--mono)">${moneyShort(val)}</text>`; }
+  const step=Math.ceil(years.length/8);
+  years.forEach((yr,i)=>{ if(i%step===0||i===years.length-1) g+=`<text x="${X(yr).toFixed(1)}" y="${H-10}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--mono)">${yr}</text>`; });
+  const band=(pLo,pHi,op)=>{ const li=idx(pLo),ui=idx(pHi);
+    const topL=years.map((yr,i)=>`${i?'L':'M'}${X(yr).toFixed(1)} ${Y(bands[i][ui]).toFixed(1)}`).join(" ");
+    const botL=years.map((yr,i)=>`L${X(years[years.length-1-i]).toFixed(1)} ${Y(bands[years.length-1-i][li]).toFixed(1)}`).join(" ");
+    return `<path d="${topL} ${botL} Z" fill="var(--indigo)" fill-opacity="${op}" stroke="none"/>`; };
+  g+=band(5,95,0.10)+band(10,90,0.16)+band(25,75,0.26);   // nested: denser toward the middle
+  const med=years.map((yr,i)=>`${i?'L':'M'}${X(yr).toFixed(1)} ${Y(bands[i][idx(50)]).toFixed(1)}`).join(" ");
+  g+=`<path d="${med}" fill="none" stroke="var(--indigo)" stroke-width="2" stroke-linejoin="round"/>`;
+  const bd=baseSeries.map((d,i)=>`${i?'L':'M'}${X(d[0]).toFixed(1)} ${Y(d[1]).toFixed(1)}`).join(" ");
+  g+=`<path d="${bd}" fill="none" stroke="var(--clay)" stroke-width="2" stroke-dasharray="6 4" stroke-linejoin="round"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img">${g}</svg>`;
+}
+let mcSeed=1234567;
+function renderMC(){
+  const basis = state.mcBasis==="cons" ? "cons" : "base";
+  const a = basis==="cons" ? consAssume() : A();
+  const shock = (basis==="cons" && state.stress.shockPct>0) ? {pct:state.stress.shockPct, age:state.stress.shockAge} : null;
+  const vol=+A().volatility; const sims=Math.max(100, Math.min(2000, +state.mcSims||1000));
+  document.getElementById("mcVol").value=A().volatility; document.getElementById("mcSims").value=sims;
+  document.querySelectorAll("#mcBasis button").forEach(x=>x.setAttribute("aria-pressed", x.dataset.b===basis));
+  const res=monteCarlo(a, vol, sims, mcSeed, shock);
+  const baseSeries=project(a, shock?{shock}:{}).map(r=>[r.year, r.netWorth*realFactor(r.year,a)]);
+  const cards=[
+    {lbl:"Portfolio lasts the horizon", val:(res.pLast*100).toFixed(0)+"%", sub:"of "+sims+" simulations", cls:res.pLast>=0.9?"pos":"neg", lead:true},
+    {lbl:"Working capital stays positive", val:(res.pWorkPos*100).toFixed(0)+"%", sub:"never dips below zero", cls:res.pWorkPos>=0.8?"pos":"neg"},
+    {lbl:"Median net worth at end (2026 $)", val:money(res.endMed), sub:"to age "+a.endAge},
+    {lbl:"Likely range at end (2026 $)", val:moneyShort(res.endLo)+" to "+moneyShort(res.endHi), sub:"5th to 95th percentile"},
+    {lbl:"Chance of a real loss", val:(res.pRealLoss*100).toFixed(0)+"%", sub:"end below "+money(res.start)+" (today's $)", cls:res.pRealLoss<=0.25?"pos":"neg"},
+  ];
+  document.getElementById("mcSummary").innerHTML=cards.map(c=>`<div class="stat${c.lead?' lead-card':''}"><div class="slbl">${c.lbl}</div><div class="sval ${c.cls||''}">${c.val}</div><div class="ssub">${c.sub}</div></div>`).join("");
+  document.getElementById("chartMC").innerHTML=fanChart(res.years, res.bands, res.pctls, baseSeries);
+  const lead = basis==="cons"
+    ? `On the <b>conservative</b> dials - <b>${a.portReturn}%</b> mean return, <b>${a.inflation}%</b> inflation${shock?`, a ${shock.pct}% shock at ${shock.age}`:``}, living to ${a.endAge} - `
+    : `On the <b>base</b> assumptions - <b>${a.portReturn}%</b> mean return, <b>${a.inflation}%</b> inflation, living to ${a.endAge} - `;
+  document.getElementById("mcVerdict").innerHTML= lead +
+    `drawing each year's return at random with <b>${vol}%</b> volatility, the portfolio lasts in <b class="hi">${(res.pLast*100).toFixed(0)}%</b> of runs and working capital stays positive in <b class="hi">${(res.pWorkPos*100).toFixed(0)}%</b>. The middle outcome leaves <b class="hi">${money(res.endMed)}</b> in today's dollars, with the spread running from ${moneyShort(res.endLo)} to ${moneyShort(res.endHi)}. The fan is darkest where outcomes cluster.`;
+}
+
+/* ---------- Tabs + events ---------- */
+function switchTab(t){
+  state.tab=t; save();
+  const map={assets:"assetsPanel",assume:"assumePanel",proj:"projPanel",dash:"dashPanel",stress:"stressPanel",mc:"mcPanel"};
+  Object.keys(map).forEach(k=>{ document.getElementById("tab-"+k).setAttribute("aria-selected",k===t); document.getElementById(map[k]).classList.toggle("hidden",k!==t); });
+  if(t==="proj") renderProjection();
+  if(t==="dash") renderDashboard();
+  if(t==="stress") renderStress();
+  if(t==="mc") renderMC();
+}
+["assets","assume","proj","dash","stress","mc"].forEach(k=>document.getElementById("tab-"+k).addEventListener("click",()=>switchTab(k)));
+document.getElementById("mcVol").addEventListener("input",e=>{ const v=parseFloat(e.target.value); A().volatility=isNaN(v)?0:v; save(); renderMC(); });
+document.getElementById("mcSims").addEventListener("change",e=>{ const v=parseInt(e.target.value); state.mcSims=isNaN(v)?1000:Math.max(100,Math.min(2000,v)); save(); renderMC(); });
+document.getElementById("mcRun").addEventListener("click",()=>{ mcSeed=(Math.random()*1e9)>>>0; renderMC(); });
+document.getElementById("mcBasis").addEventListener("click",e=>{ const b=e.target.closest("button[data-b]"); if(!b)return; state.mcBasis=b.dataset.b; save(); renderMC(); });
+document.getElementById("addAsset").addEventListener("click",()=>{ state.assets.push({id:uid(),name:"New asset",amount:0,bucket:"working"}); save(); renderAssets(); });
+document.getElementById("view").addEventListener("click",e=>{ const b=e.target.closest("button[data-v]"); if(!b)return; state.view=b.dataset.v; document.querySelectorAll("#view button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===state.view)); save(); renderProjection(); });
+document.getElementById("inflInput").addEventListener("input",e=>{ const v=parseFloat(e.target.value); A().inflation=isNaN(v)?0:v; save(); const fi=document.getElementById("f_inflation"); if(fi) fi.value=A().inflation; renderProjection(); renderDashboard(); });
+document.getElementById("export").addEventListener("click",()=>{ const blob=new Blob([JSON.stringify({assets:state.assets,assume:state.assume,stress:state.stress,schedule:state.schedule,view:state.view},null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="financial-projection.json"; a.click(); URL.revokeObjectURL(a.href); });
+document.getElementById("importBtn").addEventListener("click",()=>document.getElementById("importFile").click());
+document.getElementById("importFile").addEventListener("change",e=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader();
+  r.onload=()=>{ try{ const s=JSON.parse(r.result); const base=fresh();
+      if(Array.isArray(s.assets)&&s.assets.length) base.assets=s.assets.map(a=>({id:a.id||uid(),name:a.name||"",amount:+a.amount||0,bucket:["portfolio","working","reserve"].includes(a.bucket)?a.bucket:"working"}));
+      if(s.assume) base.assume={...DEF_ASSUME,...s.assume}; if(s.stress) base.stress={...DEF_STRESS,...s.stress}; if(s.schedule) base.schedule=Object.assign(base.schedule,s.schedule);
+      base.view=s.view==="real"?"real":"nominal"; state=base; save(); initFromState();
+    }catch(err){ alert("That file could not be read as projection data."); } };
+  r.readAsText(f); e.target.value=""; });
+document.getElementById("reset").addEventListener("click",()=>{ if(confirm("Reset assets, assumptions and schedule back to the worksheet defaults?")){ state=fresh(); save(); initFromState(); } });
+
+(function(){ const top=document.getElementById("projScrollTop"), wrap=document.getElementById("projGridWrap"); if(!top||!wrap)return; let lock=false;
+  top.addEventListener("scroll",function(){ if(lock)return; lock=true; wrap.scrollLeft=top.scrollLeft; lock=false; });
+  wrap.addEventListener("scroll",function(){ if(lock)return; lock=true; top.scrollLeft=wrap.scrollLeft; lock=false; });
+})();
+/* ---------- Init ---------- */
+function rollForward(){
+  const cy=new Date().getFullYear(); const sy=+state.assume.startYear;
+  if(cy>sy){
+    const d=cy-sy;
+    state.assume.startAge=(+state.assume.startAge)+d;
+    state.assume.coreStart=Math.round((+state.assume.coreStart)*Math.pow(1+(+state.assume.spendGrowth)/100, d));
+    state.assume.firstYearGrowth=+state.assume.portReturn;
+    state.assume.startYear=cy; save();
+  }
+}
+/* ---------- Device sync (client-encrypted, Netlify Blobs) ---------- */
+const SYNC_URL="/.netlify/functions/sync";
+const SYNC_CFG_KEY="projection.sync.cfg";
+let syncPushTimer=null, syncState="off", conflictObj=null, conflictAt=0;
+function syncCfg(){ try{ return JSON.parse(localStorage.getItem(SYNC_CFG_KEY)||"null"); }catch(e){ return null; } }
+function setSyncCfg(c){ try{ localStorage.setItem(SYNC_CFG_KEY, JSON.stringify(c)); }catch(e){} }
+function saveLocalOnly(){ try{ localStorage.setItem(KEY, JSON.stringify(stateSnapshot())); }catch(e){} }
+
+function b64(buf){ const a=new Uint8Array(buf); let s=""; for(let i=0;i<a.length;i++) s+=String.fromCharCode(a[i]); return btoa(s); }
+function unb64(str){ const bin=atob(str); const a=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); return a; }
+async function deriveKey(pass, salt){
+  const base=await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2", salt, iterations:150000, hash:"SHA-256"}, base, {name:"AES-GCM", length:256}, false, ["encrypt","decrypt"]);
+}
+async function encryptState(obj, pass){
+  const salt=crypto.getRandomValues(new Uint8Array(16)), iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(pass, salt);
+  const ct=await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, new TextEncoder().encode(JSON.stringify(obj)));
+  const packed=new Uint8Array(28+ct.byteLength); packed.set(salt,0); packed.set(iv,16); packed.set(new Uint8Array(ct),28);
+  return b64(packed);
+}
+async function decryptPayload(payload, pass){
+  const packed=unb64(payload); const salt=packed.slice(0,16), iv=packed.slice(16,28), ct=packed.slice(28);
+  const key=await deriveKey(pass, salt);
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM", iv}, key, ct);
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function applySnapshot(s){
+  const base=fresh();
+  if(Array.isArray(s.assets)&&s.assets.length) base.assets=s.assets.map(a=>({id:a.id||uid(),name:a.name||"",amount:+a.amount||0,bucket:["portfolio","working","reserve"].includes(a.bucket)?a.bucket:"working"}));
+  if(s.assume) base.assume={...DEF_ASSUME,...s.assume};
+  if(s.stress) base.stress={...DEF_STRESS,...s.stress};
+  if(s.schedule) base.schedule=Object.assign(base.schedule, s.schedule);
+  if(s.labels) base.labels={...base.labels,...s.labels};
+  if(s.mcSims) base.mcSims=+s.mcSims;
+  if(s.mcBasis) base.mcBasis=s.mcBasis==="cons"?"cons":"base";
+  base.view=s.view==="real"?"real":"nominal";
+  return base;
+}
+function setSyncStatus(st, extra){
+  syncState=st; const p=document.getElementById("syncPill"); if(!p) return;
+  const map={off:["Sync off",""],ok:["Synced"+(extra?" "+extra:""),"ok"],pending:["Change pending","busy"],saving:["Saving...","busy"],syncing:["Syncing...","busy"],offline:["Offline (cached)","busy"],auth:["Sync: token rejected","bad"],badpass:["Sync: wrong passphrase","bad"],conflict:["Sync conflict","bad"]};
+  const m=map[st]||map.off; p.textContent=m[0]; p.className="sync-pill"+(m[1]?" "+m[1]:"");
+}
+function relTime(ms){ if(!ms) return ""; const s=Math.round((Date.now()-ms)/1000); if(s<60) return "just now"; const m=Math.round(s/60); if(m<60) return m+" min ago"; const h=Math.round(m/60); if(h<24) return h+" h ago"; return Math.round(h/24)+" d ago"; }
+
+async function syncInit(){
+  const cfg=syncCfg();
+  if(!cfg||!cfg.enabled){ setSyncStatus("off"); return; }
+  setSyncStatus("syncing");
+  try{
+    const res=await fetch(SYNC_URL, {headers: cfg.token?{"x-sync-token":cfg.token}:{}});
+    if(res.status===401){ setSyncStatus("auth"); return; }
+    if(!res.ok) throw new Error("http "+res.status);
+    const rec=await res.json();
+    if(rec && rec.payload){
+      let obj; try{ obj=await decryptPayload(rec.payload, cfg.passphrase); }catch(e){ setSyncStatus("badpass"); return; }
+      const serverAt=rec.updatedAt||0, baseAt=cfg.lastServerAt||0;
+      if(serverAt>baseAt){
+        if(cfg.dirty){ showConflict(serverAt, obj); return; }
+        state=applySnapshot(obj); saveLocalOnly(); cfg.lastServerAt=serverAt; setSyncCfg(cfg); rerenderAll();
+        setSyncStatus("ok", relTime(serverAt)); return;
+      }
+    }
+    if(cfg.dirty){ syncPush(false); return; }
+    setSyncStatus("ok", relTime(cfg.lastServerAt));
+  }catch(e){ setSyncStatus("offline"); }
+}
+function syncSchedulePush(){
+  const cfg=syncCfg(); if(!cfg||!cfg.enabled) return;
+  cfg.dirty=true; setSyncCfg(cfg); setSyncStatus("pending");
+  clearTimeout(syncPushTimer); syncPushTimer=setTimeout(()=>syncPush(false), 1500);
+}
+async function syncPush(force){
+  const cfg=syncCfg(); if(!cfg||!cfg.enabled) return;
+  setSyncStatus("saving");
+  try{
+    const payload=await encryptState(stateSnapshot(), cfg.passphrase);
+    const res=await fetch(SYNC_URL, {method:"POST", headers:{"Content-Type":"application/json", ...(cfg.token?{"x-sync-token":cfg.token}:{})}, body:JSON.stringify({payload, baseUpdatedAt:cfg.lastServerAt||0, force:!!force})});
+    if(res.status===401){ setSyncStatus("auth"); return; }
+    if(res.status===409){ const r=await res.json(); showConflict(r.updatedAt, null); return; }
+    if(!res.ok) throw new Error("http "+res.status);
+    const r=await res.json(); cfg.lastServerAt=r.updatedAt; cfg.dirty=false; setSyncCfg(cfg);
+    setSyncStatus("ok", relTime(r.updatedAt));
+  }catch(e){ setSyncStatus("offline"); }
+}
+function showConflict(serverAt, obj){
+  conflictObj=obj; conflictAt=serverAt; setSyncStatus("conflict");
+  document.getElementById("syncBannerText").textContent="A newer version was saved from another device "+relTime(serverAt)+". Choose which copy to keep.";
+  document.getElementById("syncBanner").classList.remove("hidden");
+}
+async function resolveConflict(useServer){
+  document.getElementById("syncBanner").classList.add("hidden");
+  const cfg=syncCfg();
+  if(useServer){
+    let obj=conflictObj, at=conflictAt;
+    if(!obj){ try{ const res=await fetch(SYNC_URL,{headers:cfg.token?{"x-sync-token":cfg.token}:{}}); const rec=await res.json(); obj=await decryptPayload(rec.payload,cfg.passphrase); at=rec.updatedAt; }catch(e){ setSyncStatus("offline"); return; } }
+    state=applySnapshot(obj); saveLocalOnly(); cfg.dirty=false; cfg.lastServerAt=at; setSyncCfg(cfg); rerenderAll(); setSyncStatus("ok", relTime(at));
+  } else { syncPush(true); }
+  conflictObj=null; conflictAt=0;
+}
+function openSyncModal(){
+  const cfg=syncCfg()||{};
+  document.getElementById("syncToken").value=cfg.token||"";
+  document.getElementById("syncPass").value=cfg.passphrase||"";
+  document.getElementById("syncModalMsg").textContent = cfg.enabled ? "Sync is on for this device." : "";
+  document.getElementById("syncModal").classList.remove("hidden");
+}
+document.getElementById("syncBtn").addEventListener("click", openSyncModal);
+document.getElementById("syncClose").addEventListener("click", ()=>document.getElementById("syncModal").classList.add("hidden"));
+document.getElementById("syncDisable").addEventListener("click", ()=>{ const cfg=syncCfg()||{}; cfg.enabled=false; setSyncCfg(cfg); setSyncStatus("off"); document.getElementById("syncModalMsg").textContent="Sync turned off on this device. Your data stays here."; });
+document.getElementById("sbUseServer").addEventListener("click", ()=>resolveConflict(true));
+document.getElementById("sbKeepMine").addEventListener("click", ()=>resolveConflict(false));
+document.getElementById("syncEnable").addEventListener("click", async ()=>{
+  const token=document.getElementById("syncToken").value.trim();
+  const passphrase=document.getElementById("syncPass").value;
+  const msg=document.getElementById("syncModalMsg");
+  if(!passphrase){ msg.textContent="Enter a passphrase first."; return; }
+  if(!(window.crypto&&crypto.subtle)){ msg.textContent="Encryption is unavailable here. Open the deployed https site (not a local file) to use sync."; return; }
+  const cfg=Object.assign({}, syncCfg()||{}, {enabled:true, token, passphrase, dirty:false}); if(cfg.lastServerAt==null) cfg.lastServerAt=0;
+  setSyncCfg(cfg); msg.textContent="Connecting..."; setSyncStatus("syncing");
+  try{
+    const res=await fetch(SYNC_URL, {headers: token?{"x-sync-token":token}:{}});
+    if(res.status===401){ setSyncStatus("auth"); msg.textContent="The access token was rejected by the server."; return; }
+    if(!res.ok) throw new Error("http "+res.status);
+    const rec=await res.json();
+    if(rec && rec.payload){
+      let obj; try{ obj=await decryptPayload(rec.payload, passphrase); }catch(e){ setSyncStatus("badpass"); msg.textContent="That passphrase could not open the shared copy. Use the same passphrase as your other device."; return; }
+      state=applySnapshot(obj); saveLocalOnly(); cfg.lastServerAt=rec.updatedAt||0; cfg.dirty=false; setSyncCfg(cfg); rerenderAll();
+      setSyncStatus("ok", relTime(cfg.lastServerAt)); msg.textContent="Sync on. Loaded the shared copy from the server.";
+    } else {
+      cfg.lastServerAt=0; setSyncCfg(cfg); await syncPush(true);
+      msg.textContent = (syncState==="ok") ? "Sync on. This device's data is now the shared copy." : ("Sync on, upload status: "+syncState);
+    }
+  }catch(e){ setSyncStatus("offline"); msg.textContent="Could not reach the sync server. The app still works offline and will retry when you reopen it."; }
+});
+
+function rerenderAll(){
+  document.querySelectorAll("#view button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===state.view));
+  document.getElementById("inflInput").value=state.assume.inflation;
+  renderAssets(); renderAssume(); renderProjection(); renderDashboard(); renderStress(); switchTab(state.tab||"assets");
+}
+function initFromState(){
+  rollForward();
+  rerenderAll();
+  document.getElementById("foot").innerHTML=`Seeded from your liquid assets and 6-5-4 worksheets. Figures save automatically in this browser; Export keeps a portable backup. This is a planning model, not financial advice.`;
+  if(typeof syncInit==="function") syncInit();
+}
+initFromState();
+</script>
+</body>
+</html>
