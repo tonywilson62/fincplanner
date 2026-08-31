@@ -1,4 +1,11 @@
 [build]
+  # Explicitly pin the base directory to the repository root. This overrides the
+  # "Base directory" set in the Netlify UI, which points at a "sync-deploy"
+  # folder that does not exist here (the contents of that folder were committed
+  # at the repo root instead, as the README describes). Removing this line makes
+  # the UI value take effect again and the build fails with
+  # "Base directory does not exist".
+  base = "."
   publish = "."
   functions = "netlify/functions"
 
