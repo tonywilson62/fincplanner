@@ -1,4 +1,8 @@
 [build]
+  # Pinned to the repo root so it overrides the stale "sync-deploy" base
+  # directory left over in the Netlify UI build settings. index.html,
+  # package.json and netlify/ all live at the root of this repo.
+  base = "."
   publish = "."
   functions = "netlify/functions"
 
