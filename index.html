@@ -103,6 +103,9 @@
   table.proj tr:hover td{background:#fff}
   .phase{font-family:var(--mono); font-size:10px; padding:0 5px; border-radius:10px}
   .phase.p6{background:var(--indigo-soft);color:var(--indigo)} .phase.p5{background:var(--amber-soft);color:#8a6516} .phase.p4{background:var(--clay-soft);color:var(--clay)} .phase.p0{color:var(--muted)}
+  .phase.gnorm{background:var(--indigo-soft);color:var(--indigo)} .phase.graise{background:var(--pounamu-soft);color:#1f4e3b} .phase.gcut{background:var(--clay-soft);color:var(--clay)}
+  .phase.bal{background:var(--indigo-soft);color:var(--indigo)} .phase.balneg{background:var(--pounamu-soft);color:#1f4e3b}
+  .dm-seg{width:100%; margin-bottom:8px} .dm-seg button{flex:1} .dm-note{font-size:11.5px; color:var(--muted); line-height:1.45; margin:0 0 10px}
   .colgroup{font-family:var(--display); font-size:12px; color:var(--muted); text-align:left; padding-top:10px}
 
   /* Dashboard */
@@ -362,7 +365,9 @@ const DEF_ASSUME = {
   drawStartAge:66, r1:6, phase2Age:75, r2:5, phase3Age:81, r3:4,
   coreStart:45300, spendGrowth:2.5,
   reserveTarget:100000, reserveReturn:1.0,
-  inflation:2.5, volatility:9.0
+  inflation:2.5, volatility:9.0,
+  drawMethod:"pct", gInitRate:5, gBand:20, gCut:10, gRaise:10,
+  bcWorking:35000, bcReserve:100000
 };
 // Conservative stress case: same plan, tougher world (overrides applied on top of base)
 const DEF_STRESS = { portReturn:4.5, inflation:3.5, spendGrowth:3.5, endAge:95, shockPct:20, shockAge:67 };
@@ -430,30 +435,52 @@ function project(a, opts){
   a=a||A(); opts=opts||{}; const sy=+a.startYear, sa=+a.startAge, ea=+a.endAge;
   const n=Math.max(0, ea-sa);
   const shockPct=opts.shock&&+opts.shock.pct?+opts.shock.pct:0, shockAge=opts.shock?+opts.shock.age:null;
-  const rows=[]; let portYB=portfolioSeed(), prevWork=0, prevRes=0;
+  const rows=[]; let portYB=portfolioSeed(), prevWork=0, prevRes=0, gWithdraw=null;
   for(let i=0;i<=n;i++){
     const year=sy+i, age=sa+i;
     let g=(i===0? +a.firstYearGrowth : +a.portReturn)/100;
     if(opts.returns && i>0 && opts.returns[i]!=null) g=opts.returns[i];   // Monte Carlo path
     const afterGrowth=portYB*(1+g); const growthAmt=afterGrowth-portYB;
-    let rate=0, phase="p0";
-    if(age>= +a.drawStartAge){
-      if(age>= +a.phase3Age){ rate=+a.r3; phase="p4"; }
-      else if(age>= +a.phase2Age){ rate=+a.r2; phase="p5"; }
-      else { rate=+a.r1; phase="p6"; }
-    }
-    rate/=100;
-    const draw=portYB*rate;
     const sc=sched(year, +a.spendGrowth); const oneoff=+sc.oneoff||0;
-    let portYE=afterGrowth-draw-oneoff;
-    if(shockPct && shockAge===age) portYE*=(1-shockPct/100);   // one-off market shock
     const core=(+a.coreStart)*Math.pow(1+(+a.spendGrowth)/100, i);
     const house=+sc.house||0, kids=+sc.kids||0, play=+sc.play||0, sup=+sc.super||0, earn=+sc.earn||0;
     const totalSpend=core+house+kids+play;
+    const method=a.drawMethod||"pct", infl=(+a.inflation)/100;
+    let rate=0, phase="p0", draw=0, working, reserve;
+    if(method==="balance"){
+      const wc=(+a.bcWorking)*Math.pow(1+infl,i);
+      const dWC = i===0 ? 0 : wc-(+a.bcWorking)*Math.pow(1+infl,i-1);   // working-capital inflation top-up
+      draw = totalSpend + dWC - sup - earn;                             // balancing figure (may be negative)
+      working = wc; reserve = (+a.bcReserve)*Math.pow(1+infl,i);
+      rate = portYB>0 ? draw/portYB : 0; phase = draw>=0 ? "bal" : "balneg";
+    } else if(age>= +a.drawStartAge){
+      if(method==="guardrails"){
+        const up=1+(+a.spendGrowth)/100;
+        if(gWithdraw==null){ gWithdraw=portYB*(+a.gInitRate)/100; phase="gnorm"; }
+        else {
+          gWithdraw*=up;
+          const cur=portYB>0?gWithdraw/portYB:0, initR=(+a.gInitRate)/100, hi=initR*(1+(+a.gBand)/100), lo=initR*(1-(+a.gBand)/100);
+          if(cur>hi){ gWithdraw*=(1-(+a.gCut)/100); phase="gcut"; }
+          else if(cur<lo){ gWithdraw*=(1+(+a.gRaise)/100); phase="graise"; }
+          else phase="gnorm";
+        }
+        draw=Math.min(Math.max(0,gWithdraw), afterGrowth);
+        rate=portYB>0?draw/portYB:0;
+      } else {
+        let r=0;
+        if(age>= +a.phase3Age){ r=+a.r3; phase="p4"; }
+        else if(age>= +a.phase2Age){ r=+a.r2; phase="p5"; }
+        else { r=+a.r1; phase="p6"; }
+        rate=r/100; draw=portYB*rate;
+      }
+    }
+    let portYE=afterGrowth-draw-oneoff;
+    if(shockPct && shockAge===age) portYE*=(1-shockPct/100);   // one-off market shock
     const totalIncome=draw+sup+earn;
-    let working, reserve;
-    if(i===0){ working=workingSeed()+(totalIncome-totalSpend); reserve=reserveSeed(); }
-    else { working=prevWork+(totalIncome-totalSpend); reserve=prevRes*(1+(+a.reserveReturn)/100); }
+    if(method!=="balance"){
+      if(i===0){ working=workingSeed()+(totalIncome-totalSpend); reserve=reserveSeed(); }
+      else { working=prevWork+(totalIncome-totalSpend); reserve=prevRes*(1+(+a.reserveReturn)/100); }
+    }
     const netWorth=portYE+working+reserve;
     rows.push({year,age,portYB,growthAmt,draw,oneoff,portYE,sup,earn,totalIncome,core,house,kids,play,totalSpend,working,reserve,netWorth,phase,rate});
     portYB=portYE; prevWork=working; prevRes=reserve;
@@ -502,21 +529,37 @@ function paintAssetsTotals(){
 }
 
 /* ---------- Assumptions tab ---------- */
-const ASSUME_FIELDS = [
-  {h:"Timeline", items:[["startYear","Start year",""],["startAge","Start age",""],["endAge","Project to age",""]]},
-  {h:"Portfolio growth", items:[["portReturn","Net return","%"],["firstYearGrowth","First-year growth","%"]]},
-  {h:"6 / 5 / 4 drawdown", items:[["drawStartAge","Drawdown starts at age",""],["r1","Phase 1 rate","%"],["phase2Age","Phase 2 from age",""],["r2","Phase 2 rate","%"],["phase3Age","Phase 3 from age",""],["r3","Phase 3 rate","%"]]},
-  {h:"Spending", items:[["coreStart","Core spend (start year)","$"],["spendGrowth","Spending growth","%"]]},
-  {h:"Emergency reserve", items:[["reserveReturn","Reserve return","%"]]},
-  {h:"Inflation", items:[["inflation","For 2026-dollar view","%"]]},
-];
+function assumeCards(){
+  const dm=["guardrails","balance"].includes(A().drawMethod)?A().drawMethod:"pct";
+  const draw = dm==="guardrails"
+    ? {h:"Drawdown", method:true, items:[["drawStartAge","Drawdown starts at age",""],["gInitRate","Initial rate","%"],["gBand","Guardrail band +/-","%"],["gCut","Cut when breached","%"],["gRaise","Raise when breached","%"]]}
+    : dm==="balance"
+    ? {h:"Drawdown", method:true, items:[["bcWorking","Working capital (2026)","$"],["bcReserve","Emergency reserve (2026)","$"]]}
+    : {h:"Drawdown", method:true, items:[["drawStartAge","Drawdown starts at age",""],["r1","Phase 1 rate","%"],["phase2Age","Phase 2 from age",""],["r2","Phase 2 rate","%"],["phase3Age","Phase 3 from age",""],["r3","Phase 3 rate","%"]]};
+  return [
+    {h:"Timeline", items:[["startYear","Start year",""],["startAge","Start age",""],["endAge","Project to age",""]]},
+    {h:"Portfolio growth", items:[["portReturn","Net return","%"],["firstYearGrowth","First-year growth","%"]]},
+    draw,
+    {h:"Spending", items:[["coreStart","Core spend (start year)","$"],["spendGrowth","Spending growth","%"]]},
+    {h:"Emergency reserve", items:[["reserveReturn","Reserve return","%"]]},
+    {h:"Inflation", items:[["inflation","For 2026-dollar view","%"]]},
+  ];
+}
 function renderAssume(){
   const grid=document.getElementById("assumeGrid");
-  grid.innerHTML=ASSUME_FIELDS.map(g=>`<div class="acard"><h3>${g.h}</h3>${g.items.map(([k,lbl,suf])=>`
-    <div class="field"><label for="f_${k}">${lbl}</label><span class="in"><input id="f_${k}" data-k="${k}" type="number" step="${suf==='%'?'0.1':'1'}" value="${A()[k]}"><span class="suffix">${suf}</span></span></div>`).join("")}</div>`).join("");
+  const dm=["guardrails","balance"].includes(A().drawMethod)?A().drawMethod:"pct";
+  grid.innerHTML=assumeCards().map(g=>{
+    const toggle = g.method
+      ? `<div class="seg dm-seg" id="dmSeg"><button data-dm="pct" aria-pressed="${dm==='pct'}">6/5/4</button><button data-dm="guardrails" aria-pressed="${dm==='guardrails'}">Guardrails</button><button data-dm="balance" aria-pressed="${dm==='balance'}">Balancing</button></div><p class="dm-note">${dm==='guardrails'?"A set initial rate that rises with inflation, then is cut or raised when the withdrawal rate drifts outside the guardrail band. Responds to markets; the fund can deplete.":dm==='balance'?"Working capital and reserve are fixed buffers that grow with inflation. The portfolio drawdown floats so total income equals spending plus the working-capital top-up. A negative drawdown means surplus income is added to the portfolio.":"A fixed percentage of the current balance, stepping down by age band. Income floats with markets; the fund cannot deplete."}</p>`
+      : "";
+    return `<div class="acard"><h3>${g.h}</h3>${toggle}${g.items.map(([k,lbl,suf])=>`
+      <div class="field"><label for="f_${k}">${lbl}</label><span class="in"><input id="f_${k}" data-k="${k}" type="number" step="${suf==='%'?'0.1':'1'}" value="${A()[k]}"><span class="suffix">${suf}</span></span></div>`).join("")}</div>`;
+  }).join("");
   grid.querySelectorAll("input[data-k]").forEach(inp=>{
     inp.addEventListener("input",e=>{ const k=e.target.dataset.k; const v=parseFloat(e.target.value); A()[k]=isNaN(v)?0:v; save(); if(document.getElementById("inflInput")) document.getElementById("inflInput").value=A().inflation; renderProjection(); renderDashboard(); });
   });
+  const seg=document.getElementById("dmSeg");
+  if(seg) seg.querySelectorAll("button[data-dm]").forEach(b=>b.addEventListener("click",()=>{ A().drawMethod=b.dataset.dm; save(); renderAssume(); renderProjection(); renderDashboard(); }));
 }
 
 /* ---------- Projection tab ---------- */
@@ -586,7 +629,11 @@ function renderProjection(){
   const _gw=document.getElementById("projGridWrap"), _sp=document.getElementById("projScrollSpacer");
   if(_gw&&_sp) _sp.style.width=_gw.scrollWidth+"px";
   const last=rows[rows.length-1];
-  document.getElementById("projFoot").innerHTML = `Net worth is year-end portfolio plus working capital plus emergency reserve. Drawdown is taken as a percent of the year-begin portfolio (${A().r1}/${A().r2}/${A().r3} by age band). Projection runs ${rows[0].year} to ${last.year}.`;
+  const _m=A().drawMethod;
+  const _dd = _m==="balance" ? `Working capital ($${Math.round(+A().bcWorking).toLocaleString("en-NZ")}) and reserve ($${Math.round(+A().bcReserve).toLocaleString("en-NZ")}) grow with inflation; the portfolio drawdown is the balancing figure so income covers spending plus the working-capital top-up`
+    : _m==="guardrails" ? `Drawdown follows a guardrails rule: a ${A().gInitRate}% initial rate lifted by inflation each year, cut ${A().gCut}% or raised ${A().gRaise}% when the withdrawal rate moves outside plus or minus ${A().gBand}% of the initial rate`
+    : `Drawdown is taken as a percent of the year-begin portfolio (${A().r1}/${A().r2}/${A().r3} by age band)`;
+  document.getElementById("projFoot").innerHTML = `Net worth is year-end portfolio plus working capital plus emergency reserve. ${_dd}. Projection runs ${rows[0].year} to ${last.year}.`;
 }
 
 /* ---------- Charts (hand-drawn SVG) ---------- */
